@@ -1,0 +1,131 @@
+---
+title: "Homework II - Basketball"
+subtitle: "Bayesian Data Analysis"
+author: "Alexander J Ohrt"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+html_document:
+    code_folding: show
+    toc: true
+    toc_depth: 3
+    theme: readable
+    highlight: textmate
+    number_sections: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+setwd("/home/ajo/gitRepos/bayesian/HW2")
+```
+
+# a) Compare the Number of Points in NBA vs. ACB
+
+In order to compare the number of points scored in a match in NBA with a match in ACB I will specify a poisson model for both the two match types, with a gamma prior distribution for the parameter in each case
+
+* NBA
+
+$$
+Y \sim Poisson(\lambda_{1})
+$$
+
+$$
+\lambda_1 \sim Gamma(\alpha_1, \beta_1)
+$$
+
+* ACB
+
+$$
+Y \sim Poisson(\lambda_{2})
+$$
+
+$$
+\lambda_2 \sim Gamma(\alpha_2, \beta_2)
+$$
+
+After some quick research on how many points are usual in the NBA and ACB, I have chose the following shape ($\alpha$) and rate ($\beta$) parameters for the priors
+
+$$
+\alpha_1 = 200, \beta_1 = 1, \alpha_2 = 160, \beta_2 = 1
+$$
+
+# b) Plot Priori, Likelihood and Posteriori
+
+First, we read the data we are given on 20 random games in each of the two leagues.
+
+```{r}
+data <- read.table("basquet.txt", header = T)
+str(data)
+head(data)
+```
+
+I will use the known fact that the likelihood of the Poisson is $P(y|\lambda) \propto e^{-\lambda n}\lambda^{\sum y_i}$ in order to calculate the likelihood in each of the two leagues. 
+
+```{r}
+delta.lambda <- 0.01
+end <- 200
+sim.points <- end/delta.lambda
+lambda <- seq(0, end, length.out = sim.points)
+n <- dim(data)[[1]]
+
+prior.par.nba <- c(alpha = 200, beta = 1)
+prior.par.acb <- c(alpha = 160, beta = 1)
+
+prior.nba <- rgamma(sim.points, shape = prior.par.nba[1], rate = prior.par.nba[2])
+prior.acb <- rgamma(sim.points, shape = prior.par.acb[1], rate = prior.par.acb[2])
+
+# Klarer ikke å beregne likelihood!!!!???? Faen. Tallene blir for store!
+likelihood.nba <- exp(-lambda*n)*lambda^sum(data[,2])
+#likelihood.nba <- map_dbl(lambda, ~ prod(dpois(data[,2], .x)))
+norm.likelihood.nba <- likelihood.nba/(sum(likelihood.nba)*delta.lambda)
+likelihood.acb <- exp(-lambda*n)*lambda^sum(data[,1])
+norm.likelihood.acb <- likelihood.acb/(sum(likelihood.acb)*delta.lambda)
+
+# Analytical solution of posterior (conjugate prior)
+posterior.par.nba <- prior.par.nba + c(sum(data[,2]), n)
+posterior.par.acb <- prior.par.acb + c(sum(data[,1]), n)
+an.posterior.nba <- rgamma(sim.points, shape = posterior.par.nba[1], rate = posterior.par.nba[2])
+an.posterior.acb <- rgamma(sim.points, shape = posterior.par.acb[1], rate = posterior.par.acb[2])
+
+df <- tibble(lambda, likelihood.nba, likelihood.acb,
+             norm.likelihood.nba, norm.likelihood.acb,
+             prior.nba,  prior.acb, 
+             an.posterior.nba, an.posterior.acb)
+
+ggplot(df) +
+    geom_density(aes(prior.nba, col = "prior.nba")) +
+    geom_density(aes(prior.acb, col = "prior.acb")) +
+    geom_density(aes(an.posterior.nba, col = "post.nba")) +
+    geom_density(aes(an.posterior.acb, col = "post.acb")) +
+    ggtitle("Distributions") +
+    xlab("lambda") +
+    #geom_line(aes(x = lambda, y = norm.likelihood.nba)) +
+    #geom_line(aes(x = lambda, y = norm.likelihood.acb)) +
+    theme_bw()
+
+# I have not been able to get this to work!? Shit, should not be difficult.    
+# Alt dette failer pga beregning av likelihood over! Får det ikke til. 
+
+ggplot(df) +
+  geom_line(aes(x = lambda, y = prior.nba, linetype = "c", col = "1")) +
+  geom_line(aes(x = lambda, y = prior.nba, linetype = "e", col = "1")) +
+  geom_line(aes(x = lambda, y = likelihood.nba, linetype = "c", col = "2")) +
+  geom_line(aes(x = lambda, y = likelihood.acb, linetype = "e", col = "2")) +
+  ggtitle("Prior distribution") +
+  ylab("density") +
+  scale_linetype_manual(name = "League", 
+    values = 1:2, labels = c("NBA", "ACB")) +
+  scale_color_manual(name = "Distribution", 
+    values = 1:2, labels = c("Prior", "Likelihood"))
+```
+
+# Probabilities
+
+## c)
+
+## d) 
+
+# e) Redefinition of the Model
+
+A basketball game cannot end in a draw. Redefine the model to take this into account. Now, the statistical model will be ... with a prior ... 
