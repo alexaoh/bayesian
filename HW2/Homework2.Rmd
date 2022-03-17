@@ -14,7 +14,7 @@ html_document:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 14, comment = "#>")
 library(ggplot2)
 library(tidyverse)
 setwd("/home/ajo/gitRepos/bayesian/HW2")
@@ -44,7 +44,7 @@ $$
 \lambda_2 \sim Gamma(\alpha_2, \beta_2)
 $$
 
-After some quick research on how many points are usual in the NBA and ACB, I have chose the following shape ($\alpha$) and rate ($\beta$) parameters for the priors
+After some quick research on how many points are usual in the NBA and ACB, I have chosen the following shape ($\alpha$) and rate ($\beta$) parameters for the priors
 
 $$
 \alpha_1 = 200, \beta_1 = 1, \alpha_2 = 160, \beta_2 = 1
@@ -63,68 +63,160 @@ head(data)
 I will use the known fact that the likelihood of the Poisson is $P(y|\lambda) \propto e^{-\lambda n}\lambda^{\sum y_i}$ in order to calculate the likelihood in each of the two leagues. 
 
 ```{r}
-delta.lambda <- 0.01
-end <- 200
-sim.points <- end/delta.lambda
-lambda <- seq(0, end, length.out = sim.points)
+delta.lambda <- 0.005
+start <- 120
+end <- 250
+sim.points <- (end-start)/delta.lambda
+lambda <- seq(start, end, length.out = sim.points)
 n <- dim(data)[[1]]
 
 prior.par.nba <- c(alpha = 200, beta = 1)
 prior.par.acb <- c(alpha = 160, beta = 1)
 
-prior.nba <- rgamma(sim.points, shape = prior.par.nba[1], rate = prior.par.nba[2])
-prior.acb <- rgamma(sim.points, shape = prior.par.acb[1], rate = prior.par.acb[2])
+prior.nba <- dgamma(lambda, shape = prior.par.nba[1], rate = prior.par.nba[2])
+prior.acb <- dgamma(lambda, shape = prior.par.acb[1], rate = prior.par.acb[2])
 
-# Klarer ikke å beregne likelihood!!!!???? Faen. Tallene blir for store!
-likelihood.nba <- exp(-lambda*n)*lambda^sum(data[,2])
-#likelihood.nba <- map_dbl(lambda, ~ prod(dpois(data[,2], .x)))
-norm.likelihood.nba <- likelihood.nba/(sum(likelihood.nba)*delta.lambda)
-likelihood.acb <- exp(-lambda*n)*lambda^sum(data[,1])
-norm.likelihood.acb <- likelihood.acb/(sum(likelihood.acb)*delta.lambda)
+#likelihood.nba <- exp(-lambda*n)*lambda^sum(data[,2])
+likelihood.nba <- map_dbl(lambda, ~ prod(dpois(data[,2], .x)))
+likelihood.nba <- likelihood.nba/(sum(likelihood.nba)*delta.lambda)
+#likelihood.acb <- exp(-lambda*n)*lambda^sum(data[,1])
+likelihood.acb <- map_dbl(lambda, ~ prod(dpois(data[,1], .x)))
+likelihood.acb <- likelihood.acb/(sum(likelihood.acb)*delta.lambda)
+
+# Simulated posterior
+prod.nba <- likelihood.nba*prior.nba
+posterior.nba <- prod.nba/(sum(prod.nba)*delta.lambda)
+prod.acb <- likelihood.acb*prior.acb
+posterior.acb <- prod.acb/(sum(prod.acb)*delta.lambda)
 
 # Analytical solution of posterior (conjugate prior)
 posterior.par.nba <- prior.par.nba + c(sum(data[,2]), n)
 posterior.par.acb <- prior.par.acb + c(sum(data[,1]), n)
-an.posterior.nba <- rgamma(sim.points, shape = posterior.par.nba[1], rate = posterior.par.nba[2])
-an.posterior.acb <- rgamma(sim.points, shape = posterior.par.acb[1], rate = posterior.par.acb[2])
+an_posterior.nba <- dgamma(lambda, shape = posterior.par.nba[1], rate = posterior.par.nba[2])
+an_posterior.acb <- dgamma(lambda, shape = posterior.par.acb[1], rate = posterior.par.acb[2])
 
 df <- tibble(lambda, likelihood.nba, likelihood.acb,
-             norm.likelihood.nba, norm.likelihood.acb,
-             prior.nba,  prior.acb, 
-             an.posterior.nba, an.posterior.acb)
+             prior.nba, prior.acb, 
+             an_posterior.nba, an_posterior.acb, 
+             posterior.nba, posterior.acb)
 
-ggplot(df) +
-    geom_density(aes(prior.nba, col = "prior.nba")) +
-    geom_density(aes(prior.acb, col = "prior.acb")) +
-    geom_density(aes(an.posterior.nba, col = "post.nba")) +
-    geom_density(aes(an.posterior.acb, col = "post.acb")) +
-    ggtitle("Distributions") +
-    xlab("lambda") +
-    #geom_line(aes(x = lambda, y = norm.likelihood.nba)) +
-    #geom_line(aes(x = lambda, y = norm.likelihood.acb)) +
+df2 <- df %>% 
+    gather(key = distribution, value = value, -lambda) 
+
+df3 <- df2 %>% 
+    separate(distribution, into = c("distribution", "league"), sep = "\\.")
+
+df2 %>% 
+    ggplot() +
+    geom_line(aes(x = lambda, y = value, col = distribution)) +
     theme_bw()
 
-# I have not been able to get this to work!? Shit, should not be difficult.    
-# Alt dette failer pga beregning av likelihood over! Får det ikke til. 
+df3 %>% 
+    ggplot() +
+    geom_line(aes(x = lambda, y = value, col = distribution)) +
+    theme_bw() + 
+    facet_wrap(~league)
 
-ggplot(df) +
-  geom_line(aes(x = lambda, y = prior.nba, linetype = "c", col = "1")) +
-  geom_line(aes(x = lambda, y = prior.nba, linetype = "e", col = "1")) +
-  geom_line(aes(x = lambda, y = likelihood.nba, linetype = "c", col = "2")) +
-  geom_line(aes(x = lambda, y = likelihood.acb, linetype = "e", col = "2")) +
-  ggtitle("Prior distribution") +
-  ylab("density") +
-  scale_linetype_manual(name = "League", 
-    values = 1:2, labels = c("NBA", "ACB")) +
-  scale_color_manual(name = "Distribution", 
-    values = 1:2, labels = c("Prior", "Likelihood"))
+df3 %>% 
+    ggplot() +
+    geom_line(aes(x = lambda, y = value, col = league)) +
+    theme_bw() + 
+    facet_wrap(~distribution) 
 ```
 
 # Probabilities
 
-## c)
+In order to answer the following probability questions we have to calculate the posterior predictive distribution. I will do this by simulating values, using the posterior we found earlier.
+
+```{r}
+set.seed(1)
+post.an.nba <- rgamma(sim.points, shape = posterior.par.nba[1], rate = posterior.par.nba[2])
+
+set.seed(1)
+y.post.sim1an_nba <- rpois(sim.points, lambda = post.an.nba) # First using the analytical posterior (conjugate)
+
+set.seed(1)
+post.samples.nba <- sample(lambda, size = sim.points, replace = T, prob = posterior.nba)
+
+set.seed(1)
+y.post.sim1sim_nba <- rpois(sim.points, lambda = post.samples.nba) # Secondly using the simulated posterior from earlier.
+
+set.seed(1)
+post.an.acb <- rgamma(sim.points, shape = posterior.par.acb[1], rate = posterior.par.acb[2])
+
+set.seed(1)
+y.post.sim1an_acb <- rpois(sim.points, lambda = post.an.acb) # First using the analytical posterior (conjugate)
+
+set.seed(1)
+post.samples.acb <- sample(lambda, size = sim.points, replace = T, prob = posterior.acb)
+
+set.seed(1)
+y.post.sim1sim_acb <- rpois(sim.points, lambda = post.samples.acb) # Secondly using the simulated posterior from earlier.
+
+df4 <- tibble(y.post.sim1an_nba, y.post.sim1sim_nba, y.post.sim1an_acb, y.post.sim1sim_acb)
+df5 <- df4 %>% 
+    gather(key = distribution, value = value) 
+
+df6 <- df5 %>% 
+    separate(distribution, into = c("distribution", "league"), sep = "_") %>% 
+    separate(distribution, into = c("distribution", "vers"), sep = "1")
+
+# Plotting the posterior predictive probabilities. 
+df6 %>% 
+    ggplot() +
+    geom_bar(aes(x = value)) +
+    theme_bw() +
+    facet_grid(row = vars(vers), col = vars(league)) +
+    ggtitle("Posterior Predictive Distributions")
+```
+
+Both the "fully simulated" and "half-simulated" posterior predictive distributions look very similar. 
+
+Let us also calculate the difference between the two posterior predictive distributions and plot it. This will come in handy when answering the following questions.
+
+```{r}
+diff.sim <- y.post.sim1sim_nba - y.post.sim1sim_acb
+diff.an <- y.post.sim1an_nba - y.post.sim1an_acb
+
+df7 <- tibble(diff.sim, diff.an)
+df8 <- df7 %>% 
+    gather(key = distribution, value = value) 
+
+df9 <- df8 %>% 
+    separate(distribution, into = c("distribution", "vers"), sep = "\\.") 
+
+# Plotting the posterior predictive probabilities. 
+df9 %>% 
+    ggplot() +
+    geom_bar(aes(x = value)) +
+    theme_bw() +
+    facet_wrap(~vers) +
+    ggtitle("Difference of Posterior Predictive Distributions")
+```
+
+
+## c) 
+
+What is the probability that more points will be scored in a randomly selected match of the Spanish league than in a randomly selected match of the NBA league? 
+
+
+```{r}
+mean(diff.sim < 0)
+mean(diff.an < 0)
+```
+
+The probabilities are given above, first based on the "fully simulated version" and second based on the "halfway simulated version". 
 
 ## d) 
+
+What is the probability that the points scored in a NBA match will be 60 points or more larger than the points scored in an ACB match?
+
+```{r}
+mean(diff.sim >= 60)
+mean(diff.an >= 60)
+```
+
+The probabilities are given above, first based on the "fully simulated version" and second based on the "halfway simulated version". 
 
 # e) Redefinition of the Model
 
