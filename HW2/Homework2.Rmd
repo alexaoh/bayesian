@@ -3,15 +3,16 @@ title: "Homework II - Basketball"
 subtitle: "Bayesian Data Analysis"
 author: "Alexander J Ohrt"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-html_document:
-    code_folding: show
-    toc: true
-    toc_depth: 3
-    theme: readable
-    highlight: textmate
-    number_sections: true
+output: 
+    html_document:
+        code_folding: show
+        toc: true
+        toc_depth: 3
+        theme: yeti
+        highlight: textmate
+        number_sections: false
+    
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width = 14, comment = "#>")
@@ -60,7 +61,7 @@ str(data)
 head(data)
 ```
 
-I will use the known fact that the likelihood of the Poisson is $P(y|\lambda) \propto e^{-\lambda n}\lambda^{\sum y_i}$ in order to calculate the likelihood in each of the two leagues. 
+The prior, likelihood and posteriori are calculated and plotted below. 
 
 ```{r}
 delta.lambda <- 0.005
@@ -129,29 +130,26 @@ df3 %>%
 In order to answer the following probability questions we have to calculate the posterior predictive distribution. I will do this by simulating values, using the posterior we found earlier.
 
 ```{r}
-set.seed(1)
+seed <- 1
+set.seed(seed)
 post.an.nba <- rgamma(sim.points, shape = posterior.par.nba[1], rate = posterior.par.nba[2])
+set.seed(seed)
+y.post.sim1an_nba <- rpois(sim.points, lambda = post.an.nba) # First using simulated values from the analytical posterior (conjugate)
 
-set.seed(1)
-y.post.sim1an_nba <- rpois(sim.points, lambda = post.an.nba) # First using the analytical posterior (conjugate)
-
-set.seed(1)
+set.seed(seed)
 post.samples.nba <- sample(lambda, size = sim.points, replace = T, prob = posterior.nba)
+set.seed(seed)
+y.post.sim1sim_nba <- rpois(sim.points, lambda = post.samples.nba) # Secondly using samples from the simulated posterior from earlier.
 
-set.seed(1)
-y.post.sim1sim_nba <- rpois(sim.points, lambda = post.samples.nba) # Secondly using the simulated posterior from earlier.
-
-set.seed(1)
+set.seed(seed)
 post.an.acb <- rgamma(sim.points, shape = posterior.par.acb[1], rate = posterior.par.acb[2])
+set.seed(seed)
+y.post.sim1an_acb <- rpois(sim.points, lambda = post.an.acb) # First using simulated values from the analytical posterior (conjugate).
 
-set.seed(1)
-y.post.sim1an_acb <- rpois(sim.points, lambda = post.an.acb) # First using the analytical posterior (conjugate)
-
-set.seed(1)
+set.seed(seed)
 post.samples.acb <- sample(lambda, size = sim.points, replace = T, prob = posterior.acb)
-
-set.seed(1)
-y.post.sim1sim_acb <- rpois(sim.points, lambda = post.samples.acb) # Secondly using the simulated posterior from earlier.
+set.seed(seed)
+y.post.sim1sim_acb <- rpois(sim.points, lambda = post.samples.acb) # Secondly using samples from the simulated posterior from earlier.
 
 df4 <- tibble(y.post.sim1an_nba, y.post.sim1sim_nba, y.post.sim1an_acb, y.post.sim1sim_acb)
 df5 <- df4 %>% 
@@ -170,7 +168,33 @@ df6 %>%
     ggtitle("Posterior Predictive Distributions")
 ```
 
-Both the "fully simulated" and "half-simulated" posterior predictive distributions look very similar. 
+```{r, eval = F, echo = F}
+# Analytical expressions also.
+x <- 120:250
+analytical.post.pred_nba <- dnbinom(x, posterior.par.nba[1], posterior.par.nba[2]/(1 + posterior.par.nba[2]))
+analytical.post.pred_acb <- dnbinom(x, posterior.par.acb[1], posterior.par.acb[2]/(1 + posterior.par.acb[2]))
+ja <- tibble(x, analytical.post.pred_nba, analytical.post.pred_acb) %>% 
+      gather(key = distribution, value = value, -x) %>% 
+      separate(distribution, into = c("distribution", "league"), sep = "_")
+
+ja %>% 
+    ggplot() +
+    geom_col(aes(x = x, y = value)) +
+    theme_minimal() +
+    facet_wrap(~league) + 
+    ggtitle("Analytical (Conjugate) Posterior Predictive Distributions")
+
+diff.analyt <- analytical.post.pred_nba - analytical.post.pred_acb
+
+tibble(x, diff.analyt) %>% 
+    ggplot() +
+    geom_col(aes(x, diff.analyt)) +
+    theme_minimal()  
+    ggtitle("Analytical (Conjugate) Posterior Predictive Distributions")
+```
+
+
+Both versions of the (simulated) posterior predictive distributions look very similar. 
 
 Let us also calculate the difference between the two posterior predictive distributions and plot it. This will come in handy when answering the following questions.
 
