@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.width = 14, comment = "#>")
 library(ggplot2)
 library(tidyverse)
 setwd("/home/ajo/gitRepos/bayesian/HW2")
+theme_set(theme_minimal())
 ```
 
 # a) Compare the Number of Points in NBA vs. ACB
@@ -109,19 +110,16 @@ df3 <- df2 %>%
 
 df2 %>% 
     ggplot() +
-    geom_line(aes(x = lambda, y = value, col = distribution)) +
-    theme_bw()
+    geom_line(aes(x = lambda, y = value, col = distribution))
 
 df3 %>% 
     ggplot() +
     geom_line(aes(x = lambda, y = value, col = distribution)) +
-    theme_bw() + 
     facet_wrap(~league)
 
 df3 %>% 
     ggplot() +
     geom_line(aes(x = lambda, y = value, col = league)) +
-    theme_bw() + 
     facet_wrap(~distribution) 
 ```
 
@@ -163,7 +161,6 @@ df6 <- df5 %>%
 df6 %>% 
     ggplot() +
     geom_bar(aes(x = value)) +
-    theme_bw() +
     facet_grid(row = vars(vers), col = vars(league)) +
     ggtitle("Posterior Predictive Distributions")
 ```
@@ -180,7 +177,6 @@ ja <- tibble(x, analytical.post.pred_nba, analytical.post.pred_acb) %>%
 ja %>% 
     ggplot() +
     geom_col(aes(x = x, y = value)) +
-    theme_minimal() +
     facet_wrap(~league) + 
     ggtitle("Analytical (Conjugate) Posterior Predictive Distributions")
 
@@ -189,7 +185,6 @@ diff.analyt <- analytical.post.pred_nba - analytical.post.pred_acb
 tibble(x, diff.analyt) %>% 
     ggplot() +
     geom_col(aes(x, diff.analyt)) +
-    theme_minimal()  
     ggtitle("Analytical (Conjugate) Posterior Predictive Distributions")
 ```
 
@@ -213,7 +208,6 @@ df9 <- df8 %>%
 df9 %>% 
     ggplot() +
     geom_bar(aes(x = value)) +
-    theme_bw() +
     facet_wrap(~vers) +
     ggtitle("Difference of Posterior Predictive Distributions")
 ```
@@ -241,7 +235,3 @@ mean(diff.an >= 60)
 ```
 
 The probabilities are given above, first based on the "fully simulated version" and second based on the "halfway simulated version". 
-
-# e) Redefinition of the Model
-
-A basketball game cannot end in a draw. Redefine the model to take this into account. Now, the statistical model will be ... with a prior ... 
