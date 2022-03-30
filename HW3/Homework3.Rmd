@@ -136,10 +136,40 @@ df2 %>%
 Now, given the posterior distributions of the two models, we can decide whether the data has been generate by a Poisson model or a Geometric model.
 
 ```{r}
+lambda <- sample(prior.lambda, replace = T, size = N)
+p.given.pois <- mean(map_dbl(lambda, ~ prod(dpois(data, .x)))) # Equivalently: Likelihood.
 
+theta <- sample(prior.theta, replace = T, size = N)
+p.given.theta <- mean(map_dbl(theta, ~ prod(dgeom(data, .x)))) # Equivalently: Likelihood.
+
+# Posterior probabilities for each model. 
+(p.poisson.given.y <- (0.5*p.given.pois)/(0.5*(p.given.pois + p.given.theta)))
+(p.geom.given.y <- 1 - p.poisson.given.y)
 ```
 
+ANER IKKE OM DETTE GIR MENING?! RESULTATET KOMMER LITT OVERRASKENDE PÅ MEG DERIMOT, TENKTE AT POISSON SKULLE VÆRE MEST SANNSYNLIG!
 
 We are asked to use the Bayesian model averaging approach to plot the posterior predictive distribution for a new future value and compute a point estimate and 95\% credible interval for the prediction. 
 
+WHAT IS THE NEW FUTURE VALUE THOUGH? DO WE NEED TO BE GIVEN THIS?
+
+The model averaging posterior distribution is given below
+
+```{r}
+post.pred.pois <- rpois(N, lambda = post.lambda)
+post.pred.geom <- rgeom(N, prob = post.theta)
+model.av.post <- p.poisson.given.y*post.pred.pois + p.geom.given.y*post.pred.geom
+
+tibble(model.av.post) %>% 
+  ggplot(aes(model.av.post)) +
+  geom_bar(aes(y = (..count..)/sum(..count..))) +
+  scale_x_continuous(limits = c(0, 15)) + 
+  ggtitle("Bayesian Model Averaging Approach Posterior Predictive Distribution")
+```
+
+A 95\% credible interval can be found via the quantile method, as displayed below. THIS DOES NOT MAKE SENSE FOR DISCRETE VALUES! Do something else. 
+
+```{r}
+quantile(model.av.post, c(0.025, 0.095))
+```
 
