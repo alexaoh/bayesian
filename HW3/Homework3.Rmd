@@ -1,0 +1,145 @@
+---
+title: "Homework III - Hypothesis Testing"
+subtitle: "Bayesian Data Analysis"
+author: "Alexander J Ohrt"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+    html_document:
+        code_folding: show
+        toc: true
+        toc_depth: 3
+        theme: yeti
+        highlight: textmate
+        number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 14, comment = "#>", warning = F)
+library(ggplot2)
+library(tidyverse)
+setwd("/home/ajo/gitRepos/bayesian/HW2")
+theme_set(theme_minimal())
+```
+
+In this problem we want to decide whether an observed set of data is generated from a Poisson model or a Geometric model. Remember that the Poisson distribution with parameter $\lambda \in \mathbb{R}^+$ has the distribution function
+
+$$
+  p(x) = \frac{e^{-\lambda}\lambda^x}{x!},
+$$
+
+and the Geometric distribution with parameter $\theta \in [0,1]$ has the distribution function 
+
+$$
+  p(x) = \theta(1-\theta)^x.
+$$
+
+We observe the number of times an event occurs. We are given the information that the expected value of the counts of this event will be between 4 and 6 with a large probability. Based on this information, we define the following prior distributions 
+
+$$
+  \pi(\lambda) = Gamma(\alpha = 1000, \beta = 200), 
+$$
+
+where $\alpha$ is a shape parameter and $\beta$ is a rate parameter, and 
+
+$$
+  \pi(\theta) = Beta(a = , b = ), 
+$$
+
+where $a$ is a shape parameter and $b$ is a rate parameter. 
+
+The prior distribution for the Poisson model is relatively easy to decide on, since we know that the expected value (and the variance) of a Poisson distributed variable is $\lambda$. The prior predictive distribution for the Poisson model is plotted below. Note that since the variance equals the expectation, we are not able to make the distribution "pointier" around the mean 5. 
+
+In order to define the prior distribution for the Geometric model, we use the fact that the expected value of a Geometrically distributed variable is $\frac{1-\theta}{\theta}$. Denoted by $k$ the expected value of this random variable, this means that $\theta = \frac{1}{k+1}$. Since we know that $4 < k < 6$ with large probability, equivalently $\frac17 < k < \frac15$ with large probability. 
+
+```{r}
+N <- 100000
+counts <- seq(0,15, length.out = N)
+params.for.lambda <- list(alpha = 100, beta = 20)
+prior.lambda <- rgamma(N, shape = params.for.lambda$alpha, rate = params.for.lambda$beta)
+sim2 <- rpois(N, lambda = prior.lambda)
+ggplot(tibble(sim2, prior.lambda), aes(sim2)) +
+  geom_bar(aes(y = (..count..)/sum(..count..))) +
+  #geom_density(aes(prior.lambda)) 
+  scale_x_continuous(limits = c(0, 15)) + 
+  ggtitle("Prior Predictive Distribution in Poisson Model")
+
+sum(sim2 <= 4)/N
+sum(sim2 >= 6)/N
+mean(sim2)
+sum(sim2 > 4 & sim2 < 6)/N
+
+estBetaParams <- function(mu, var) {
+  alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
+  beta <- alpha * (1 / mu - 1)
+  return(params = list(alpha = alpha, beta = beta))
+}
+params.for.theta <- estBetaParams(0.175, 0.00001)
+prior.theta <- rbeta(N, shape1 = params.for.theta$alpha, shape2 = params.for.theta$beta)
+
+ggplot(tibble(prior.theta), aes(prior.theta)) +
+  geom_density(aes(prior.theta)) +
+  scale_x_continuous(limits = c(0, 1)) + 
+  ggtitle("Prior Distribution for theta")
+
+#expected <- (1-prior.theta)/prior.theta
+sim <- rgeom(N, prior.theta)
+ggplot(tibble(sim), aes(sim)) +
+  geom_bar(aes(y = (..count..)/sum(..count..))) + 
+  scale_x_continuous(limits = c(0, 15)) + 
+  ggtitle("Prior Predictive Distribution in Geometric Model")
+mean(sim)
+sum(sim<=4)/N
+mean(sim<=4)
+sum(sim>=6)/N
+mean(sim>=6)
+sum(sim > 4 & sim < 6)/N
+```
+
+NOT SATISFIED WITH THE PRIORS YET! TRY MORE LATER! KANSKJE BEDRE Å BARE SETTE DISKRETE PRIORS ELLERNO? ELLER SKAL PRIOR DEFINERES MELLOM 4 OG 6 BARE? (Uniform typ).
+
+The data we observed is given below. 
+
+```{r}
+data <- c(1,2,2,8,10)
+n <- length(data)
+s <- sum(data)
+```
+
+Since the Gamma distribution is a conjugate prior for the Poisson and the Beta distribution is a conjugate prior for the Geometric, we know their respective posterior distributions. We calculate the posteriors below.
+
+```{r}
+post.theta <- rbeta(N, shape1 = params.for.theta$alpha + n, params.for.theta$beta + s)
+post.lambda <- rgamma(N, shape = params.for.lambda$alpha + s, rate = params.for.lambda$beta + n)
+
+df <- tibble(counts, prior.theta, post.theta,
+             prior.lambda, post.lambda)
+
+df2 <- df %>% 
+    gather(key = distribution, value = value, -counts) 
+
+df2 %>% 
+  filter(distribution %in% c("prior.theta", "post.theta")) %>% 
+  ggplot() +
+  geom_density(aes(x = value, col = distribution)) +
+  scale_x_continuous(limits = c(0, 1)) + 
+  ggtitle("Distributions for theta")
+
+# De er (omtrent) helt like som priorene fordi priorene har veldig lite varians!
+
+df2 %>% 
+  filter(distribution %in% c("prior.lambda", "post.lambda")) %>% 
+  ggplot() +
+  geom_density(aes(x = value, col = distribution)) +
+  ggtitle("Distributions for lambda")
+```
+
+Now, given the posterior distributions of the two models, we can decide whether the data has been generate by a Poisson model or a Geometric model.
+
+```{r}
+
+```
+
+
+We are asked to use the Bayesian model averaging approach to plot the posterior predictive distribution for a new future value and compute a point estimate and 95\% credible interval for the prediction. 
+
+
