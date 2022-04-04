@@ -1,0 +1,22 @@
+https://github.com/shawnatuli/uci-ics-olympic-games-bayesian-data-analysis
+
+https://github.com/ryan-quigley/sjsu-bayesian-project
+
+https://www.kaggle.com/datasets?topic=trendingDataset
+
+http://www.sfs.uni-tuebingen.de/~mfranke/bda+cm2015/projects/projects.html
+
+Regularization from a Bayesians standpoint: Could calculate Ridge/Lasso regressions (e.g.) with "regular" packages and perhaps show that the results are the same (on some data set) when using the Bayesian framework with given priors (in this case: multivariate Gaussian and Laplace).
+
+http://krasserm.github.io/2019/03/14/bayesian-neural-networks/
+
+https://gregorygundersen.com/blog/2018/04/29/reparameterization/
+
+https://arxiv.org/pdf/1903.05779.pdf
+
+http://proceedings.mlr.press/v48/gal16.pdf
+
+https://medium.com/autonomous-agents/bayesian-regularization-for-neuralnetworks-2f2d34f03adc
+
+https://www.kaggle.com/datasets/timmofeyy/-fire-cases-in-uk-within-last-3-years
+
