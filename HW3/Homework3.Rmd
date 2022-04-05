@@ -73,10 +73,15 @@ In order to define the prior distribution for the Geometric model, we use the fa
 params.for.theta <- list(a = 50, b = 235)
 prior.theta <- rbeta(N, shape1 = params.for.theta$a, shape2 = params.for.theta$b)
 
+e.pr <- (1-prior.theta)/prior.theta
 ggplot(tibble(prior.theta), aes(prior.theta)) +
-  geom_density(aes(prior.theta)) +
+  geom_density() +
   scale_x_continuous(limits = c(0, 1)) + 
   ggtitle("Prior Distribution for theta")
+
+ggplot(tibble(e.pr), aes(e.pr)) +
+  geom_density() +
+  ggtitle("Prior Distribution for Expectation of Theta")
 
 sim <- rgeom(N, prior.theta)
 ggplot(tibble(sim), aes(sim)) +
@@ -85,6 +90,7 @@ ggplot(tibble(sim), aes(sim)) +
   ggtitle("Prior Predictive Distribution in Geometric Model")
 
 mean(prior.theta > 1/7 & prior.theta < 1/5)
+mean(e.pr > 4 & e.pr < 6)
 ```
 
 Note that the choice of parameters for the prior leads to a probability of $\frac17 < k < \frac15$ of `r mean(prior.theta > 1/7 & prior.theta < 1/5)`.
@@ -167,6 +173,15 @@ tibble(model.av.post.an) %>%
   geom_bar(aes(y = (..count..)/sum(..count..))) +
   scale_x_continuous(limits = c(0, 15)) + 
   ggtitle("Bayesian Model Averaging Approach Posterior Predictive Distribution (Directly from Analytical Posterior Predictive)")
+
+# After seeing the solution, this is obviously more correct, since we should simulate from each of the predictive posteriors with the given 
+# probabilities and NOT multiply the simulated values with the given probabilities, as I did above!
+aux <- (runif(N)<(p.poisson.given.y))
+TOT <- post.pred.pois*aux+post.pred.geom*(1-aux)
+tibble(TOT) %>% 
+  ggplot(aes(TOT)) +
+  geom_bar(aes(y = (..count..)/sum(..count..))) +
+  ggtitle("Bayesian Model Averaging Approach Posterior Predictive Distribution (Correct)")
 ```
 
 A point estimate for a new future value could be the mean of the Bayesian Model Averaging Approach Posterior Predictive Distribution shown above. The mean is given by
@@ -174,6 +189,7 @@ A point estimate for a new future value could be the mean of the Bayesian Model 
 ```{r}
 mean(model.av.post)
 mean(model.av.post.an)
+mean(TOT)
 ```
 
 Since counts are discrete values, we round this up, which gives 5 as a point estimate of a new future values. 
@@ -183,6 +199,7 @@ A 95\% credible interval can be found (for example) via the quantile method, as 
 ```{r}
 quantile(model.av.post, c(0.025, 0.975))
 quantile(model.av.post.an, c(0.025, 0.975))
+quantile(TOT, c(0.025, 0.975))
 ```
 
 Since counts are discrete values, the quantile based 95\% credible interval is [0, 18] in this case. 
