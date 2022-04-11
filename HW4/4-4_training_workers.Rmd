@@ -1,0 +1,307 @@
+---
+title: "Homework IV"
+subtitle: "Bayesian Data Analysis - UPC Spring 2022"
+author: "Alexander J Ohrt"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  # html_document:
+  #   code_folding: hide
+  #   toc: true
+  #   toc_depth: 3
+  #   theme: readable
+  #   highlight: textmate
+  #   number_sections: false
+    pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("/home/ajo/gitRepos/bayesian/HW4")
+library(rstan)
+library(bayesplot)
+library(tidyverse)
+```
+
+# Exercise 4.4: Two Methods of Training Workers; Comparison of Means
+
+The Human Resources Department of a large company wishes to compare two methods of training industrial workers to perform a skilled task. Twenty workers are selected: 10 of them are randomly assigned to be trained using method A, and the other 10 are assigned to be trained using method B. After the training is complete, all the workers are tested on the speed of performance at the task. The times taken to complete the task are 
+
+```{r}
+method.A <- c(115, 120, 111, 123, 116, 121, 118, 116, 127, 129)
+method.B <- c(123, 131, 113, 119, 123, 113, 128, 126, 125, 128)
+df <- rbind(c(method.A,mean(method.A), sd(method.A)), c(method.B,mean(method.B), sd(method.B)))
+rownames(df) <- c("Method A", "Method B")
+colnames(df) <- c(rep("", 10), "Mean", "Standard Error")
+```
+
+```{r, echo = F}
+knitr::kable(df, caption = "Times Taken to Complete Task for each Method")
+```
+
+## a) Find Posterior Distributions of Parameters $\mu_A, \mu_B$
+
+We assume that the observations come from $N(\mu_A, \sigma)$ and $N(\mu_A, \sigma)$, where $\sigma = 6$. Use independent $N(m,s)$ prior distributions for $\mu_A, \mu_B$, where $m = 100, s = 20$. The posterior distributions of the parameters are found using Stan (via R).
+
+First we define the Stan model and fit it. 
+
+```{r, cache = T}
+# Define model and call stan. 
+data_list <- list(
+  nA = length(method.A),
+  nB = length(method.B),
+  tA = method.A,
+  tB = method.B
+)
+
+fit <- stan("4-4_training_workers.stan", iter = 1000, chains = 4,
+             data = data_list, seed = 1)
+```
+
+The convergence analysis shows that the chains have converged, because `Rhat = 1`. Moreover, the traceplots seem to show that the chains have converged to similar values. 
+
+```{r}
+# Convergence analysis.
+print(fit)
+traceplot(fit)
+
+posterior <- as.data.frame(fit)
+head(posterior)          
+dim(posterior)
+
+post.muA <- posterior[,1]
+post.muB <- posterior[,2]
+
+# Are the autocorrelation plots needed for something here?
+par(mfrow = c(2, 1))
+acf(post.muA)
+acf(post.muB)
+par(mfrow = c(1, 1))
+```
+
+The posterior distributions are plotted with medians and 80\% intervals below.
+
+```{r}
+plot_title <- ggtitle("Posterior distributions of mu", "with medians and 80% intervals")
+mcmc_areas(posterior, 
+  pars = c("muA", "muB"), 
+  prob = 0.8) + plot_title
+```
+
+The Stan code is given below for completeness. The `.stan` files are also submitted. 
+
+```{r, eval = F}
+data{ 
+  int<lower=0> nA;
+  int<lower=0> nB;
+  
+  real<lower=0> tA[nA];
+  real<lower=0> tB[nB];
+}
+
+parameters{
+  real muA;
+  real muB;
+}
+
+model{
+  tA ~ normal(muA, 6);
+  tB ~ normal(muB, 6);
+  
+  muA ~ normal(100, 20);
+  muB ~ normal(100, 20);
+}
+```
+
+
+## b) Find Posterior Distribution of $\mu_A - \mu_B$
+
+The posterior distribution of $\mu_A - \mu_B$ is found and plotted below. 
+
+```{r}
+post.diff <- post.muA - post.muB
+#t <- seq(105, 135, length.out=length(post.muA))
+ggplot(tibble(post.diff)) +
+  geom_density(aes(post.diff)) +
+  theme_minimal() +
+  ggtitle("Posterior Distribution of muA - muB")
+```
+
+
+## c) Find a 95\% Bayesian Credible Interval (CI) for $\mu_A - \mu_B$
+
+A 95\% quantile CI for $\mu_A - \mu_B$ is found below. 
+
+```{r}
+(CI.perc <- quantile(post.diff, probs = c(0.025, 0.975)))
+```
+
+## d) Repeat the Previous Problems, Supposing that $\sigma$ is Unknown
+
+The steps are repeated supposing that $\sigma$ is unknown. Notice that we still assume that it is equal in both populations. When $\sigma$ is unknown, we have to define a prior distribution for this parameter as well. We will solve the problem assuming two different priors for $\sigma$;
+
+1) $\pi_1 \sim U[0,50]$ (uninformative)
+2) $\pi_1 \sim N(6,10)$ 
+
+### Case 1)
+
+Using the uninformative prior, the results are given in the following. 
+
+```{r, cache = T}
+fit2 <- stan("4-4_training_workers2.stan", iter = 1000, chains = 4,
+             data = data_list, seed = 1)
+# Hva gjør jeg hvis den divergerer?
+# Noe rart med prior som er grunnen?
+```
+
+```{r}
+# Convergence analysis.
+print(fit2) # This has not converged!
+traceplot(fit2)
+
+posterior2 <- as.data.frame(fit2)
+head(posterior2)          
+dim(posterior2)
+
+post.muA2 <- posterior2[,1]
+post.muB2 <- posterior2[,2]
+
+# Are the autocorrelation plots needed for something here?
+par(mfrow = c(2, 1))
+acf(post.muA2)
+acf(post.muB2)
+par(mfrow = c(1, 1))
+```
+
+```{r}
+plot_title <- ggtitle("Case 1: Posterior distributions of mu", "with medians and 80% intervals")
+mcmc_areas(posterior2, 
+  pars = c("muA", "muB"), 
+  prob = 0.8) + plot_title
+```
+
+The posterior of $\mu_A - \mu_B$ is given below. 
+
+```{r}
+post.diff2 <- post.muA2 - post.muB2
+#t <- seq(105, 135, length.out=length(post.muA))
+ggplot(tibble(post.diff2)) +
+  geom_density(aes(post.diff2)) +
+  theme_minimal() +
+  ggtitle("Case1: Posterior Distribution of muA - muB")
+```
+
+A 95\% quantile CI for $\mu_A - \mu_B$ is found below. 
+
+```{r}
+(CI.perc2 <- quantile(post.diff2, probs = c(0.025, 0.975)))
+```
+
+
+The Stan code used in this case is very similar to the code used earlier, but is shown below. 
+
+```{r, eval = F}
+data{ 
+  int<lower=0> nA;
+  int<lower=0> nB;
+  
+  real<lower=0> tA[nA];
+  real<lower=0> tB[nB];
+}
+
+parameters{
+  real muA;
+  real muB;
+  real<lower=0> sigma;
+}
+
+model{
+  tA ~ normal(muA, sigma);
+  tB ~ normal(muB, sigma);
+  
+  muA ~ normal(100, 20);
+  muB ~ normal(100, 20);
+  sigma ~ uniform(0,50);
+}
+```
+
+### Case 2)
+
+Using the normal prior, the results are given in the following. 
+
+```{r, cache = T}
+fit3 <- stan("4-4_training_workers3.stan", iter = 1000, chains = 4,
+             data = data_list, seed = 1)
+```
+
+```{r}
+print(fit3)
+traceplot(fit3)
+
+posterior3 <- as.data.frame(fit3)
+head(posterior3)          
+dim(posterior3)
+
+post.muA3 <- posterior3[,1]
+post.muB3 <- posterior3[,2]
+
+# Are the autocorrelation plots needed for something here?
+par(mfrow = c(2, 1))
+acf(post.muA3)
+acf(post.muB3)
+par(mfrow = c(1, 1))
+```
+
+
+```{r}
+plot_title <- ggtitle("Case 2: Posterior distributions of mu", "with medians and 80% intervals")
+mcmc_areas(posterior3, 
+  pars = c("muA", "muB"), 
+  prob = 0.8) + plot_title
+```
+
+The posterior of $\mu_A - \mu_B$ is given below. 
+
+```{r}
+post.diff3 <- post.muA3 - post.muB3
+#t <- seq(105, 135, length.out=length(post.muA))
+ggplot(tibble(post.diff3)) +
+  geom_density(aes(post.diff3)) +
+  theme_minimal() +
+  ggtitle("Case2: Posterior Distribution of muA - muB")
+```
+
+A 95\% quantile CI for $\mu_A - \mu_B$ is found below. 
+
+```{r}
+(CI.perc3 <- quantile(post.diff3, probs = c(0.025, 0.975)))
+```
+
+The Stan code is again given below. The only difference compared to in Case 1 is the change in the prior for sigma. 
+
+```{r, eval = F}
+data{ 
+  int<lower=0> nA;
+  int<lower=0> nB;
+  
+  real<lower=0> tA[nA];
+  real<lower=0> tB[nB];
+}
+
+parameters{
+  real muA;
+  real muB;
+  real<lower=0> sigma;
+}
+
+model{
+  tA ~ normal(muA, sigma);
+  tB ~ normal(muB, sigma);
+  
+  muA ~ normal(100, 20);
+  muB ~ normal(100, 20);
+  sigma ~ normal(6,10);
+}
+```
+
