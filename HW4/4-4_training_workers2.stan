@@ -18,5 +18,6 @@ model{
   
   muA ~ normal(100, 20);
   muB ~ normal(100, 20);
-  sigma ~ uniform(0,50);
+  sigma ~ normal(6,100);
 }
+

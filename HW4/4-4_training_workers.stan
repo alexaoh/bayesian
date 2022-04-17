@@ -18,3 +18,4 @@ model{
   muA ~ normal(100, 20);
   muB ~ normal(100, 20);
 }
+

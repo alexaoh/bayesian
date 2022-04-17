@@ -85,7 +85,7 @@ fit3 <- stan("stan_models/4-10_leukemia.stan", iter = 1000, chains = 4,
 ## Convergence analysis
 print(fit3)
 
-posterior <- as.data.frame(fit4)
+posterior <- as.data.frame(fit3)
 colnames(posterior)
 
 ### Autocorrelation plot
@@ -253,8 +253,3 @@ fit2 <- stan("stan_models/4-12_basquet_2.stan", iter = 1000, chains = 4,
              data = data_list, seed = 1)
 
 # P[29.5 < X < 30.5]
-
-
-
-
-

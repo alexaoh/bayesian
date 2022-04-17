@@ -1,0 +1,1 @@
+The main report is "4-4_training_workers.pdf". I have added the Rmd made to compile the report, as well as a pure R file with only the code (the code is identical to all the code blocks in the Rmd in total). Moreover, the .stan files are added for completeness. I have finally added the report in html format, in case that is interesting. 

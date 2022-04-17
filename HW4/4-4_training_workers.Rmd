@@ -46,7 +46,7 @@ We assume that the observations come from $N(\mu_A, \sigma)$ and $N(\mu_A, \sigm
 
 First we define the Stan model and fit it. 
 
-```{r, cache = T}
+```{r, cache = T, results='hide'}
 # Define model and call stan. 
 data_list <- list(
   nA = length(method.A),
@@ -59,7 +59,7 @@ fit <- stan("4-4_training_workers.stan", iter = 1000, chains = 4,
              data = data_list, seed = 1)
 ```
 
-The convergence analysis shows that the chains have converged, because `Rhat = 1`. Moreover, the traceplots seem to show that the chains have converged to similar values. 
+The convergence analysis shows that the chains have converged, because `Rhat =1`. Moreover, the traceplots seem to show that the chains have converged to similar values. 
 
 ```{r}
 # Convergence analysis.
@@ -72,11 +72,21 @@ dim(posterior)
 
 post.muA <- posterior[,1]
 post.muB <- posterior[,2]
+```
 
-# Are the autocorrelation plots needed for something here?
+From the autocorrelation plots below we can see that there is little to no significant autocorrelation, which is a good diagnostic result for the MCMC sampler. 
+
+```{r, echo = F}
 par(mfrow = c(2, 1))
+```
+
+
+```{r, fig.height=5}
 acf(post.muA)
 acf(post.muB)
+```
+
+```{r, echo = F}
 par(mfrow = c(1, 1))
 ```
 
@@ -89,7 +99,7 @@ mcmc_areas(posterior,
   prob = 0.8) + plot_title
 ```
 
-The Stan code is given below for completeness. The `.stan` files are also submitted. 
+The Stan code from file `4-4_training_workers.stan` is given below for completeness. Note that all the `.stan` files are also submitted. 
 
 ```{r, eval = F}
 data{ 
@@ -121,7 +131,6 @@ The posterior distribution of $\mu_A - \mu_B$ is found and plotted below.
 
 ```{r}
 post.diff <- post.muA - post.muB
-#t <- seq(105, 135, length.out=length(post.muA))
 ggplot(tibble(post.diff)) +
   geom_density(aes(post.diff)) +
   theme_minimal() +
@@ -141,23 +150,23 @@ A 95\% quantile CI for $\mu_A - \mu_B$ is found below.
 
 The steps are repeated supposing that $\sigma$ is unknown. Notice that we still assume that it is equal in both populations. When $\sigma$ is unknown, we have to define a prior distribution for this parameter as well. We will solve the problem assuming two different priors for $\sigma$;
 
-1) $\pi_1 \sim U[0,50]$ (uninformative)
-2) $\pi_1 \sim N(6,10)$ 
+1) $\pi_1 \sim N(6,100)$ (less informative)
+2) $\pi_1 \sim N(6,10)$ (more informative)
 
 ### Case 1)
 
-Using the uninformative prior, the results are given in the following. 
+Using the less informative prior among the two, the results are given in the following. 
 
-```{r, cache = T}
+```{r, cache = T, results="hide"}
 fit2 <- stan("4-4_training_workers2.stan", iter = 1000, chains = 4,
              data = data_list, seed = 1)
-# Hva gjør jeg hvis den divergerer?
-# Noe rart med prior som er grunnen?
 ```
+
+The convergence analysis shows that the chains have converged. 
 
 ```{r}
 # Convergence analysis.
-print(fit2) # This has not converged!
+print(fit2)
 traceplot(fit2)
 
 posterior2 <- as.data.frame(fit2)
@@ -166,11 +175,23 @@ dim(posterior2)
 
 post.muA2 <- posterior2[,1]
 post.muB2 <- posterior2[,2]
+post.sigma2 <- posterior[,3]
+```
 
-# Are the autocorrelation plots needed for something here?
-par(mfrow = c(2, 1))
+From the autocorrelation plots below we can see that there is little to no significant autocorrelation in the series for $\mu_A$ and $\mu_B$, which is a good diagnostic result for the MCMC sampler. Notice that the series for $\sigma$ presents significant autocorrelation in the first lags, but it declines rapidly with increasing lags. 
+
+```{r, echo = F}
+par(mfrow = c(3, 1))
+```
+
+
+```{r, fig.height=5}
 acf(post.muA2)
 acf(post.muB2)
+acf(post.sigma2)
+```
+
+```{r, echo = F}
 par(mfrow = c(1, 1))
 ```
 
@@ -181,15 +202,23 @@ mcmc_areas(posterior2,
   prob = 0.8) + plot_title
 ```
 
+The posterior of $\sigma$ is also plotted, for completeness, even though this is not essential to our task at hand.
+
+```{r}
+plot_title <- ggtitle("Case 1: Posterior distribution of sigma", "with median and 80% interval")
+mcmc_areas(posterior2, 
+  pars = c("sigma"), 
+  prob = 0.8) + plot_title
+```
+
 The posterior of $\mu_A - \mu_B$ is given below. 
 
 ```{r}
 post.diff2 <- post.muA2 - post.muB2
-#t <- seq(105, 135, length.out=length(post.muA))
 ggplot(tibble(post.diff2)) +
   geom_density(aes(post.diff2)) +
   theme_minimal() +
-  ggtitle("Case1: Posterior Distribution of muA - muB")
+  ggtitle("Case 1: Posterior Distribution of muA - muB")
 ```
 
 A 95\% quantile CI for $\mu_A - \mu_B$ is found below. 
@@ -198,8 +227,7 @@ A 95\% quantile CI for $\mu_A - \mu_B$ is found below.
 (CI.perc2 <- quantile(post.diff2, probs = c(0.025, 0.975)))
 ```
 
-
-The Stan code used in this case is very similar to the code used earlier, but is shown below. 
+The Stan code in the file `4-4_training_workers3.stan` is given below for completeness. It is very similar to the code used earlier. 
 
 ```{r, eval = F}
 data{ 
@@ -222,18 +250,20 @@ model{
   
   muA ~ normal(100, 20);
   muB ~ normal(100, 20);
-  sigma ~ uniform(0,50);
+  sigma ~ normal(6,100);
 }
 ```
 
 ### Case 2)
 
-Using the normal prior, the results are given in the following. 
+Using the more informative Gaussian prior, the results are given in the following. 
 
-```{r, cache = T}
+```{r, cache = T, results="hide"}
 fit3 <- stan("4-4_training_workers3.stan", iter = 1000, chains = 4,
              data = data_list, seed = 1)
 ```
+
+The convergence analysis shows that the chains have converged. 
 
 ```{r}
 print(fit3)
@@ -245,11 +275,22 @@ dim(posterior3)
 
 post.muA3 <- posterior3[,1]
 post.muB3 <- posterior3[,2]
+post.sigma3 <- posterior3[,3]
+```
 
-# Are the autocorrelation plots needed for something here?
-par(mfrow = c(2, 1))
+From the autocorrelation plots below we can see that there is little to no significant autocorrelation, which is a good diagnostic result for the MCMC sampler. 
+
+```{r, echo = F}
+par(mfrow = c(3, 1))
+```
+
+```{r, fig.height=5}
 acf(post.muA3)
 acf(post.muB3)
+acf(post.sigma3)
+```
+
+```{r, echo = F}
 par(mfrow = c(1, 1))
 ```
 
@@ -261,15 +302,23 @@ mcmc_areas(posterior3,
   prob = 0.8) + plot_title
 ```
 
+The posterior of $\sigma$ is also plotted, for completeness, even though this is not essential to our task at hand.
+
+```{r}
+plot_title <- ggtitle("Case 2: Posterior distribution of sigma", "with median and 80% interval")
+mcmc_areas(posterior3, 
+  pars = c("sigma"), 
+  prob = 0.8) + plot_title
+```
+
 The posterior of $\mu_A - \mu_B$ is given below. 
 
 ```{r}
 post.diff3 <- post.muA3 - post.muB3
-#t <- seq(105, 135, length.out=length(post.muA))
 ggplot(tibble(post.diff3)) +
   geom_density(aes(post.diff3)) +
   theme_minimal() +
-  ggtitle("Case2: Posterior Distribution of muA - muB")
+  ggtitle("Case 2: Posterior Distribution of muA - muB")
 ```
 
 A 95\% quantile CI for $\mu_A - \mu_B$ is found below. 
@@ -278,7 +327,7 @@ A 95\% quantile CI for $\mu_A - \mu_B$ is found below.
 (CI.perc3 <- quantile(post.diff3, probs = c(0.025, 0.975)))
 ```
 
-The Stan code is again given below. The only difference compared to in Case 1 is the change in the prior for sigma. 
+The Stan code in the file `4-4_training_workers3.stan` is given below for completeness. The only difference compared to in Case 1 is the change in the prior for sigma.
 
 ```{r, eval = F}
 data{ 
@@ -305,3 +354,14 @@ model{
 }
 ```
 
+All in all, we can see that the results are relatively similar in all three cases. Despite the fact that the $\sigma$ is not precisely defined in either of the two cases in section **d)**, the credible intervals are similar, as seen below
+
+```{r}
+df <- rbind(CI.perc, CI.perc2, CI.perc3)
+rownames(df) <- c("Const. sigma", "Case 1", "Case 2")
+knitr::kable(df)
+```
+
+Moreover, the posterior distributions of $\mu_A, \mu_B$ and $\mu_A - \mu_B$ look very similar in all three cases. Additionally, the posterior distribution of $\sigma$ looks very similar for both the defined priors, despite the fact that the variance of the first prior is much larger than the variance of the second prior. 
+
+From the analysis we can conclude that, with 95\% credibility, the means between the two groups are not different (since 0 is contained in the CI's for the difference of means in all three cases), i.e. that we with 95\% credibility conclude that neither method A nor method B yields better speed performance among the workers. 

@@ -20,3 +20,4 @@ model{
   muB ~ normal(100, 20);
   sigma ~ normal(6,10);
 }
+
