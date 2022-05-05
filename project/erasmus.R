@@ -61,7 +61,8 @@ df <- df %>% filter(duration <= 365, duration >= 20)
 summary(df)
 describe(df)
 
-
+# I write this datafram to a csv file in order to easily read in other files (already cleaned)
+write.csv(df,"cleaned.csv", row.names = FALSE)
 
 ###############
 #### Plots ####
