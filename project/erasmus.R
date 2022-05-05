@@ -40,17 +40,24 @@ summary(df)
 # Observations:
 # - some weird age values
 # - not many NA's, think we can safely remove those rows
+any(is.na(df %>% select(age))) # There are no age NA values after filtering on the activity above (only standard Erasmus exchange).
+colSums(is.na(df)) # There are only 4 missing nationalities, that's it.
+
 # - more participants than one is an error I believe, we can probably remove those
+dim(df %>% filter(participants > 1)) #There are approx 9000 of these. 
+
 
 df <- df %>% na.omit %>% filter(age > 15, age < 80, participants == 1)
 summary(df)
 
 # Observations:
-# - Is 600 days duration too much? Should we treat is as an outlier?
+# - Is 600 days duration too much? Should we treat it as an outlier?
 # - Is one month too short of a stay? Should we not include those? 
-length(df[df$duration >= 365,])
-# Eight observations which has an Erasmus period over a year
-df <- df %>% filter(duration < 365, duration > 20)
+dim(df %>% filter(duration > 365)) 
+# 88 observations which has an Erasmus period over a year.
+dim(df %>% filter(duration < 20)) 
+# 32 observations have an Erasmus period of less than 20 days. 
+df <- df %>% filter(duration <= 365, duration >= 20)
 summary(df)
 describe(df)
 
@@ -67,14 +74,14 @@ ggplot(data = df) +
   labs(title = "Age of erasmus students",
        x = "Age",
        y = "Number of students")
-ggsave("./plots/age_bar.png")
+ggsave("./626fca86090ba51a6aff419a/plots/age_bar.pdf")
 
 ggplot(data = df) + 
   geom_boxplot(aes(gender, age)) + 
   labs(title = "Age distribution for genders",
        x = "Gender",
        y = "Age")
-ggsave("./plots/age_gender_box.png")
+ggsave("./626fca86090ba51a6aff419a/plots/age_gender_box.pdf")
 
 # Observations:
 # - Higher age for males than females
@@ -87,14 +94,14 @@ ggplot(data = df) +
   labs(x = "Sending country",
        y = "Number of students",
        fill = "Sending country")
-ggsave("./plots/sending_countries.png")
+ggsave("./626fca86090ba51a6aff419a/plots/sending_countries.pdf")
 
 ggplot(data = df) + 
   geom_bar(aes(x = fct_infreq(receiving.country), fill = receiving.country)) +
   labs(x = "Receiving country",
        y = "Number of students",
        fill = "Receiving country")
-ggsave("./plots/receiving_countries.png")
+ggsave("./626fca86090ba51a6aff419a/plots/receiving_countries.pdf")
 
 # Observations:
 # - Spain has most incoming students, could plot more detailed about which 
@@ -109,12 +116,29 @@ ggplot(data = df, aes(duration, color = gender, fill = gender)) +
        y = "Number of students",
        color = "Gender",
        fill = "Gender")
-ggsave("./plots/duration_hist.png")
+ggsave("./626fca86090ba51a6aff419a/plots/duration_hist.pdf")
 
 ggplot(data = df, aes(duration, color = gender)) + 
   geom_density(position = "identity") +
   labs(x = "Duration [days]",
        y = "Density",
        color = "Gender",
-       fill = "Gender")
-ggsave("./plots/duration_densities.png", width = 10, height = 6)
+       fill = "Gender") 
+ggsave("./626fca86090ba51a6aff419a/plots/duration_densities.pdf", width = 10, height = 6)
+
+# Observation / theories: 
+# - To me it looks like the duration can be reasonably well described by a mix of two Gaussians: 
+# 1) One Gaussian with mean around 130 ish, with a smaller variance.
+# 2) Another Gaussian with mean around 280, with a larger variance. 
+# Se eksempel nedenfor!
+N <- 100000
+components <- sample(1:2,prob=c(0.7,0.3),size=N,replace=TRUE)
+mus <- c(120,280)
+sds <- c(10,18) 
+
+samples <- rnorm(N)*sds[components]+mus[components]
+
+tibble(samples) %>% 
+  ggplot(aes(samples)) +
+  geom_density(aes(y = (..count..)/sum(..count..))) +
+  ggtitle("Mix of Gaussian")
