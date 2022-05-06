@@ -2,6 +2,7 @@ library(dplyr)
 library(Hmisc)
 library(ggplot2)
 library(forcats)
+library(xtable)
 
 
 ##################################################
@@ -59,6 +60,7 @@ dim(df %>% filter(duration < 20))
 # 32 observations have an Erasmus period of less than 20 days. 
 df <- df %>% filter(duration <= 365, duration >= 20)
 summary(df)
+#print(xtable(summary(subset(df, select=-c(activity,participants)))))
 describe(df)
 
 # I write this datafram to a csv file in order to easily read in other files (already cleaned)
