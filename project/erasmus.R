@@ -70,6 +70,8 @@ write.csv(df,"cleaned.csv", row.names = FALSE)
 #### Plots ####
 ###############
 
+theme_minimal()
+
 ### Age
 ggplot(data = df) +
   geom_bar(aes(age)) +
@@ -77,14 +79,14 @@ ggplot(data = df) +
   labs(title = "Age of erasmus students",
        x = "Age",
        y = "Number of students")
-ggsave("./626fca86090ba51a6aff419a/plots/age_bar.pdf")
+ggsave("./626fca86090ba51a6aff419a/plots/age_bar.pdf", width = 7, height = 5)
 
 ggplot(data = df) + 
   geom_boxplot(aes(gender, age)) + 
   labs(title = "Age distribution for genders",
        x = "Gender",
        y = "Age")
-ggsave("./626fca86090ba51a6aff419a/plots/age_gender_box.pdf")
+ggsave("./626fca86090ba51a6aff419a/plots/age_gender_box.pdf", width = 7, height = 5)
 
 # Observations:
 # - Higher age for males than females
@@ -96,15 +98,17 @@ ggplot(data = df) +
   geom_bar(aes(x = fct_infreq(sending.country), fill = sending.country)) + 
   labs(x = "Sending country",
        y = "Number of students",
-       fill = "Sending country")
-ggsave("./626fca86090ba51a6aff419a/plots/sending_countries.pdf")
+       fill = "Sending country") +
+  theme(axis.text.x = element_text(size=6))
+ggsave("./626fca86090ba51a6aff419a/plots/sending_countries.pdf", width = 7, height = 5)
 
 ggplot(data = df) + 
   geom_bar(aes(x = fct_infreq(receiving.country), fill = receiving.country)) +
   labs(x = "Receiving country",
        y = "Number of students",
-       fill = "Receiving country")
-ggsave("./626fca86090ba51a6aff419a/plots/receiving_countries.pdf")
+       fill = "Receiving country") +
+  theme(axis.text.x = element_text(size=6))
+ggsave("./626fca86090ba51a6aff419a/plots/receiving_countries.pdf", width = 7, height = 5)
 
 # Observations:
 # - Spain has most incoming students, could plot more detailed about which 
@@ -119,7 +123,7 @@ ggplot(data = df, aes(duration, color = gender, fill = gender)) +
        y = "Number of students",
        color = "Gender",
        fill = "Gender")
-ggsave("./626fca86090ba51a6aff419a/plots/duration_hist.pdf")
+ggsave("./626fca86090ba51a6aff419a/plots/duration_hist.pdf", width = 10, height = 6)
 
 ggplot(data = df, aes(duration, color = gender)) + 
   geom_density(position = "identity") +
