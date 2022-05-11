@@ -60,6 +60,7 @@ dim(df %>% filter(duration < 20))
 # 32 observations have an Erasmus period of less than 20 days. 
 df <- df %>% filter(duration <= 365, duration >= 20)
 summary(df)
+str(df)
 #print(xtable(summary(subset(df, select=-c(activity,participants)))))
 describe(df)
 
