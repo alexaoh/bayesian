@@ -31,7 +31,7 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 500
+points <- 50
 data_list <- list(
   n=points,
   y=sample(dur, size = points) # Sample `points` number of points from the dataset.
@@ -90,6 +90,12 @@ tibble(samples) %>%
   geom_density(aes(y = (..count..)/sum(..count..))) +
   ggtitle("Mix of Gaussian")
 ggsave("../626fca86090ba51a6aff419a/plots/postpred1.pdf", width = 7, height = 5)
+
+# Usikker på om denne er normalisert (slik at det er en density)
+# eller om den som er plottet ovenfor er det?!
+d <- density(samples, n = N)
+plot(d)
+# Uansett er begge to en kernel density estimator. 
 
 n <- 10000
 # We select the statistics 1st quart, median and 3rd quart. 
