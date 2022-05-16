@@ -31,14 +31,25 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 50
+points <- 50000
+train <- sample(dur, size = points)
 data_list <- list(
   n=points,
-  y=sample(dur, size = points) # Sample `points` number of points from the dataset.
+  y=train # Sample `points` number of points from the dataset.
 )
 
 fit1 <- stan("../stan_models/model1.stan", iter = 1000, chains = 4,
-            data = data_list, seed = 1)
+            data = data_list, seed = 1, cores = 8)
+
+# Save the fitted object in order to not run again every time. 
+# Analysis can easily be done later by loading this object. 
+save(fit1, train, file="model150k.RData") # Used for saving several objects. 
+#saveRDS(fit1, file = "model1FIT50k.rds") # Used for saving one object. 
+
+#fit1 <- readRDS("model1FIT50k.rds") # Load one object.
+# Load several objects into scope.
+# In this case we load "fit1" and "train".
+load(file = "model150k.RData")
 
 # Convergence analysis.
 print(fit1)
