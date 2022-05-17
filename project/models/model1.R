@@ -121,18 +121,18 @@ plot(d)
 
 # NY POSTERIOR PREDICTIVE. JEG TROR DENNE BLIR MER KORREKT!
 # Sjekk det ut du også! Det er ikke denne som er lagt inn i rapporten enda!
-N <- 10000
+N <- dim(posterior)[[1]]
 components <- rep(NA, N)
-probs <- sample(posterior$p, size = N, replace = T)
+#probs <- sample(posterior$p, size = N, replace = T)
+probs <- posterior$p
 unf <- runif(N)
 components[unf <= probs] <- 1
 components[unf > probs] <- 2
 mus <- rep(NA, N)
-mus[unf <= probs] <- sample(posterior$mu1, size = table(unf <= probs)[[2]], replace = T)
-mus[unf > probs] <- sample(posterior$mu2, size = table(unf > probs)[[2]], replace = T)
-sd.both <- sample(posterior$sigma, size = N, replace = T)
-sds <- c(sd.both, sd.both)
-samples <- rnorm(N)*sds[components]+mus[components]
+mus[unf <= probs] <- sample(posterior$mu1, size = table(unf <= probs)[[2]], replace = F)
+mus[unf > probs] <- sample(posterior$mu2, size = table(unf > probs)[[2]], replace = F)
+sds <- sample(posterior$sigma, size = N, replace = F)
+samples <- rnorm(N)*sd+mus
 tibble(samples) %>% 
   ggplot(aes(samples)) +
   geom_density(aes(y = (..count..)/sum(..count..))) +
@@ -147,6 +147,7 @@ statistic.distrs <- list(first = rep(NA, n), median = rep(NA, n),
                          mean = rep(NA, n), third = rep(NA, n))
 
 
+jada <- rep(0, n)
 for(i in 1:n){
   # Simulate the posterior distribution using every simulated value from MCMC fit (Stan) once. 
   p.mean <- posterior$p[i]
@@ -158,6 +159,8 @@ for(i in 1:n){
   mus <- c(mu1.mean,mu2.mean)
   sds <- c(sigma.mean,sigma.mean) 
   samples <- rnorm(N)*sds[components]+mus[components]
+  
+  jada <- jada + samples
 
   # Simulate from the posterior distribution.
   q <- quantile(samples, c(0.25, 0.5, 0.75))
@@ -167,6 +170,7 @@ for(i in 1:n){
   statistic.distrs$third[i] <- q[3]
 }
 
+plot(density(jada))
 # Compare with the same statistics in the data. The "data" in this case is the sampled data point
 # used to fit the model fith Stan.
 q.data <- quantile(train, c(0.25, 0.5, 0.75)) 
