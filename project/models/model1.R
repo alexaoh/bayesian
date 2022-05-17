@@ -31,25 +31,25 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 50000
+points <- 10000
 train <- sample(dur, size = points)
 data_list <- list(
   n=points,
   y=train # Sample `points` number of points from the dataset.
 )
 
-fit1 <- stan("../stan_models/model1.stan", iter = 1000, chains = 4,
-            data = data_list, seed = 1, cores = 8)
+# fit1 <- stan("../stan_models/model1.stan", iter = 1000, chains = 4,
+#             data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
 # Analysis can easily be done later by loading this object. 
-save(fit1, train, file="model150k.RData") # Used for saving several objects. 
+save(fit1, train, file="model1_10k.RData") # Used for saving several objects. 
 #saveRDS(fit1, file = "model1FIT50k.rds") # Used for saving one object. 
 
 #fit1 <- readRDS("model1FIT50k.rds") # Load one object.
 # Load several objects into scope.
 # In this case we load "fit1" and "train".
-load(file = "model150k.RData")
+load(file = "model1_10k.RData")
 
 # Convergence analysis.
 print(fit1)
@@ -71,9 +71,9 @@ par(mar = c(4, 4, 1.5, 1))
 plot(chains1$mu1, chains1$mu2, col="black", pch=16, cex=0.8,
      xlab="mu1", ylab="mu2", xlim = c(130, 140), ylim = c(270, 300), 
      main = "Chains for mu1 and mu2 Plotted in Two Dimensions")
-points(chains2$mu1, chains2$mu2, col="red", pch=16, cex=0.8, alpha = 0.5)
-points(chains3$mu1, chains3$mu2, col="yellow", pch=16, cex=0.8, alpha = 0.4)
-points(chains4$mu1, chains4$mu2, col="blue", pch=16, cex=0.8, alpha = 0.3)
+points(chains2$mu1, chains2$mu2, col=rgb(red = 1, green = 0, blue = 0, alpha = 0.5), pch=16, cex=0.8)
+points(chains3$mu1, chains3$mu2, col=rgb(red = 0, green = 1, blue = 0, alpha = 0.4), pch=16, cex=0.8)
+points(chains4$mu1, chains4$mu2, col=rgb(red = 0, green = 0, blue = 1, alpha = 0.3), pch=16, cex=0.8)
 #lines(0.08*(1:100) - 4, 0.08*(1:100) - 4, col="grey", lw=2)
 legend("topright", c("Chain 1", "Chain 2", "Chain 3", "Chain 4"),
        fill=c("black", "red",
@@ -99,8 +99,12 @@ samples <- rnorm(N)*sds[components]+mus[components]
 tibble(samples) %>% 
   ggplot(aes(samples)) +
   geom_density(aes(y = (..count..)/sum(..count..))) +
-  ggtitle("Mix of Gaussian")
+  ggtitle("Mix of Gaussian") + 
+  ylab("Posterior Predictive Distribution") +
+  xlab("Duration [days]") +
 ggsave("../626fca86090ba51a6aff419a/plots/postpred1.pdf", width = 7, height = 5)
+# Cannot open file (over). Vet ikke hvorfor det ikke funker for meg. Lagret derfor plottene 
+# direkte i mappen manuelt, men bør fikses senere tenker jeg (for å få rett width/height etc).
 
 # Usikker på om denne er normalisert (slik at det er en density)
 # eller om den som er plottet ovenfor er det?!
@@ -108,6 +112,7 @@ d <- density(samples, n = N)
 plot(d)
 # Uansett er begge to en kernel density estimator. 
 
+### Model Checking. 
 n <- 10000
 # We select the statistics 1st quart, median and 3rd quart. 
 statistic.distrs <- list(first = rep(NA, n), median = rep(NA, n), third = rep(NA, n))
@@ -127,7 +132,7 @@ for(i in 1:n){
 }
 
 # Compare with the same statistics in the data. 
-q.data <- quantile(dur, c(0.25, 0.5, 0.75))
+q.data <- quantile(dur, c(0.25, 0.5, 0.75)) # Replace with "train" (use the sample we trained model on).
 
 # Plot shows that the first quartile in the data is highly unlikely in the reference distribution. 
 # Perhaps not a good model then!
