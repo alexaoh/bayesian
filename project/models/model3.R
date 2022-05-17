@@ -31,7 +31,7 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 5000
+points <- 500
 data_list <- list(
   n=points,
   y=sample(dur, size = points) # Sample `points` number of points from the dataset.

@@ -30,24 +30,20 @@ data$gender <- as.integer(data$gender) - 1
 describe(data)
 
 
-# We want to model the duration of the student exchange. 
-dur <- data$duration 
-age <- data$age
-gender <- data$gender
 
-data_list <- c(dur, age, gender)
 points <- 500
+sample_df <- data[sample(1:nrow(data), points),]
+summary(sample_df)
 
-
-
-any(is.na(dur)) # Checking to be sure that there are no NA here. 
 
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
 data_list <- list(
   n=points,
-  y=sample(dur, size = points) # Sample `points` number of points from the dataset.
+  y=sample_df$duration,
+  x1=sample_df$age,
+  x2=sample_df$gender
 )
 
 fit1 <- stan("../stan_models/model4.stan", iter = 1000, chains = 4,

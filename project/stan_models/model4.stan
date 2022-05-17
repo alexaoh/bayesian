@@ -9,37 +9,28 @@ parameters{
     real<lower=0> sigma1;
     real<lower=0> sigma2;
     real<lower=0,upper=1> p;
-    real<lower=0> nu;
-    real<lower=0> gam;
-    real beta10;
-    real<lower=beta10> beta20;
-    real beta11;
-    real beta21;
-    real beta12;
-    real beta22;
-    real mu1;
-    real mu2;
-    real gam1;
-    real gam2;
+    real beta01;
+    real<lower=beta01>  beta02;
+    real beta1;
+    real beta2;
 }
 
 model{
-    beta10 ~ normal(120, sigma1);
-    beta20 ~ normal(280, sigma2);
-    beta21 ~ normal(mu1, gam1);
-    beta22 ~ normal(mu2, gam2);
-    mu1 ~ normal(1,10);
-    mu2 ~ normal(1,10);
-    gam1 ~ inv_gamma(1,1);
-    gam2 ~ inv_gamma(1,1);
-    sigma1 ~ inv_gamma(nu,gam);
-    sigma2 ~ inv_gamma(nu,gam);
-    nu ~ normal(1,10);
-    gam ~ inv_gamma(1,1);
+    beta01 ~ normal(120, sigma1);
+    beta02 ~ normal(280, sigma2);
+    beta1 ~ normal(0,100);
+    beta2 ~ normal(0,100);
+    sigma1 ~ inv_gamma(1,1);
+    sigma2 ~ inv_gamma(1,1);
     p ~ uniform(0,1);
     for (i in 1:n) {
         target += log_sum_exp(
-            log(p) + normal_lpdf(y[i] | beta10 + x1[i]*beta11 + x2[i]*beta21, sigma1),
-            log1m(p) + normal_lpdf(y[i] | beta20 + x1[i]*beta21 + x2[i]*beta22, sigma2));
+            log(p) + normal_lpdf(y[i] | beta01 + beta1*x1[i] + beta2*x2[i], sigma1),
+            log1m(p) + normal_lpdf(y[i] | beta02 + beta1*x1[i] + beta2*x2[i], sigma2));
     }
+}
+
+generated quantities {
+    real y_pred[n];
+    y_pred = p*normal_rng(beta01 + beta1*x1 + beta2*x2, sigma1) + (1- p)*normal_rng(beta02 + beta1*x1 + beta2*x2, sigma2);
 }
