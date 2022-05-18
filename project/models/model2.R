@@ -5,35 +5,19 @@ library(Hmisc)
 library(ggplot2)
 
 setwd("/home/ajo/gitRepos/bayesian/project/models")
-# Read the data that was cleaned in "erasmus.R".
-data <- read.csv("../cleaned.csv")
-summary(data)
-dim(data)
-
-# Change the data types again. 
-data <- data %>% transmute(duration = as.numeric(duration),
-                           age = as.numeric(age),
-                           gender = as.factor(gender),
-                           nationality = as.factor(nationality),
-                           sending.country = as.factor(sending.country),
-                           receiving.country = as.factor(receiving.country),
-                           activity = as.factor(activity),
-                           participants = participants)
-
-describe(data)
+# Read the training data set that was sampled in "sample_data_points.R".
+data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 
 # We want to model the duration of the student exchange. 
 dur <- data$duration 
-any(is.na(dur)) # Checking to be sure that there are no NA here. 
 
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 10000
-train <- sample(dur, size = points)
+points <- dim(data)[[1]]
 data_list <- list(
   n=points,
-  y=train # Sample `points` number of points from the dataset.
+  y=dur
 )
 
 fit2 <- stan("../stan_models/model2.stan", iter = 1000, chains = 4,

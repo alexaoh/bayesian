@@ -21,8 +21,11 @@ data <- data %>% transmute(duration = as.numeric(duration),
 describe(data)
 
 # Sample 10k rows. 
-n <- 10000
+n <- 15000
 indices <- sample(1:dim(data)[[1]], size = n)
 new.sample <- data %>% slice(indices)
-saveRDS(new.sample, file = "10kpoints.rds")
+saveRDS(new.sample, file = "15kpoints.rds")
 # This variable can be loaded from this file into the other files!
+
+# Make table of quantiles in the duration data, will be used for model checking later. 
+print(xtable(summary(subset(new.sample, select=-c(activity,participants)))))
