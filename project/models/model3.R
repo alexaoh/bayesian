@@ -31,7 +31,7 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 1000
+points <- 5000
 data_list <- list(
   n=points,
   y=sample(dur, size = points) # Sample `points` number of points from the dataset.
@@ -47,78 +47,24 @@ traceplot(fit1)
  # Lag en ok LaTeX tabell!
 xtable(summary(fit1)$summary)
 
-
-# Annen måte å plotte chainsene på. 
-# https://mc-stan.org/users/documentation/case-studies/identifying_mixture_models.html
-# Lånt fra lenken: kan være grei å bruke for å sjekke at alt er greit underveis også!
-chains1 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,1,])
-chains2 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,2,])
-chains3 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,3,])
-chains4 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,4,])
-
-par(mar = c(4, 4, 1.5, 1))
-plot(chains1$mu1, chains1$mu2, col="black", pch=16, cex=0.8,
-     xlab="mu1", ylab="mu2", xlim = c(130, 140), ylim = c(270, 300), 
-     main = "Chains for mu1 and mu2 Plotted in Two Dimensions")
-points(chains2$mu1, chains2$mu2, col="red", pch=16, cex=0.8, alpha = 0.5)
-points(chains3$mu1, chains3$mu2, col="yellow", pch=16, cex=0.8, alpha = 0.4)
-points(chains4$mu1, chains4$mu2, col="blue", pch=16, cex=0.8, alpha = 0.3)
-#lines(0.08*(1:100) - 4, 0.08*(1:100) - 4, col="grey", lw=2)
-legend("topright", c("Chain 1", "Chain 2", "Chain 3", "Chain 4"),
-       fill=c("black", "red",
-              "yellow", "blue"), box.lty=0, inset=0.0005)
-
 posterior <- as.data.frame(fit1)
-head(posterior)          
-dim(posterior)
+y_pred <- posterior[, "y_pred"]
+plot(density(y_pred))
 
-plot(density(posterior[, "y_pred"])
-
-####### Model Checking
-# Calculate the Posterior Predictive Distribution (Det stemmer vel dette?)
-p.mean <- mean(posterior$p)
-mu1.mean <- mean(posterior$mu1)
-mu2.mean <- mean(posterior$mu2)
-sigma1.mean <- mean(posterior$sigma1)
-sigma2.mean <- mean(posterior$sigma2)
-
-N <- 10000
-components <- sample(1:2,prob=c(p.mean,1-p.mean),size=N,replace=TRUE)
-mus <- c(mu1.mean,mu2.mean)
-sds <- c(sigma1.mean,sigma2.mean) 
-samples <- rnorm(N)*sds[components]+mus[components]
-tibble(samples) %>% 
-  ggplot(aes(samples)) +
+tibble(y_pred) %>% 
+  ggplot(aes(y_pred)) +
   geom_density(aes(y = (..count..)/sum(..count..))) +
   ggtitle("Mix of Gaussian")
 ggsave("../626fca86090ba51a6aff419a/plots/postpred3.pdf", width = 7, height = 5)
 
-# Usikker på om denne er normalisert (slik at det er en density)
-# eller om den som er plottet ovenfor er det?!
-d <- density(samples, n = N)
-plot(d)
-# Uansett er begge to en kernel density estimator. 
 
-n <- 10000
 # We select the statistics 1st quart, median and 3rd quart. 
-statistic.distrs <- list(first = rep(NA, n), median = rep(NA, n), third = rep(NA, n))
-
-for(i in 1:n){
-  # Simulate the posterior distribution. 
-  components <- sample(1:2,prob=c(p.mean,1-p.mean),size=N,replace=TRUE)
-  mus <- c(mu1.mean,mu2.mean)
-  sds <- c(sigma1.mean,sigma2.mean) 
-  samples <- rnorm(N)*sds[components]+mus[components]
-  
-  # Simulate from the posterior distribution.
-  q <- quantile(samples, c(0.25, 0.5, 0.75))
-  statistic.distrs$first[i] <- q[1]
-  statistic.distrs$median[i] <- q[2]
-  statistic.distrs$third[i] <- q[3]
-}
+q.sim <- quantile(y_pred, c(0.25, 0.5, 0.75))
+q.sim
 
 # Compare with the same statistics in the data. 
 q.data <- quantile(dur, c(0.25, 0.5, 0.75))
+q.data
 
 # Plot shows that the first quartile in the data is highly unlikely in the reference distribution. 
 # Perhaps not a good model then!
