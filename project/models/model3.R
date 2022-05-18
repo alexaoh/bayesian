@@ -31,7 +31,7 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 500
+points <- 1000
 data_list <- list(
   n=points,
   y=sample(dur, size = points) # Sample `points` number of points from the dataset.
@@ -72,6 +72,7 @@ posterior <- as.data.frame(fit1)
 head(posterior)          
 dim(posterior)
 
+plot(density(posterior[, "y_pred"])
 
 ####### Model Checking
 # Calculate the Posterior Predictive Distribution (Det stemmer vel dette?)

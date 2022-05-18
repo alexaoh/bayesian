@@ -53,6 +53,8 @@ fit1 <- stan("../stan_models/model4.stan", iter = 1000, chains = 4,
 print(fit1)
 traceplot(fit1)
 
+
+
 # Lag en ok LaTeX tabell!
 xtable(summary(fit1)$summary)
 
@@ -65,21 +67,15 @@ chains2 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,2,])
 chains3 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,3,])
 chains4 <- as.data.frame(rstan::extract(fit1, permuted=FALSE)[,4,])
 
-par(mar = c(4, 4, 1.5, 1))
-plot(chains1$mu1, chains1$mu2, col="black", pch=16, cex=0.8,
-     xlab="mu1", ylab="mu2", xlim = c(130, 140), ylim = c(270, 300), 
-     main = "Chains for mu1 and mu2 Plotted in Two Dimensions")
-points(chains2$mu1, chains2$mu2, col="red", pch=16, cex=0.8, alpha = 0.5)
-points(chains3$mu1, chains3$mu2, col="yellow", pch=16, cex=0.8, alpha = 0.4)
-points(chains4$mu1, chains4$mu2, col="blue", pch=16, cex=0.8, alpha = 0.3)
-#lines(0.08*(1:100) - 4, 0.08*(1:100) - 4, col="grey", lw=2)
-legend("topright", c("Chain 1", "Chain 2", "Chain 3", "Chain 4"),
-       fill=c("black", "red",
-              "yellow", "blue"), box.lty=0, inset=0.0005)
-
 posterior <- as.data.frame(fit1)
 head(posterior)          
 dim(posterior)
+
+hist(posterior[,"y_pred"])
+
+mcmc_trace(posterior, 
+           pars = c("p", "sigma", "beta01",
+                    "beta02", "beta1", "beta2"))
 
 
 ####### Model Checking

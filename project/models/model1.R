@@ -210,3 +210,4 @@ tibble(statistic.distrs$third) %>%
   geom_vline(xintercept = stat.data$third)
 # Also did numerical calculation.
 min(mean(statistic.distrs$third < stat.data$third), mean(statistic.distrs$third > stat.data$third))
+
