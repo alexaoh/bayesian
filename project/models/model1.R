@@ -13,21 +13,22 @@ options(mc.cores = parallel::detectCores())
 set.seed(1234)
 setwd("/home/ajo/gitRepos/bayesian/project/models")
 # Read the data that was cleaned in "erasmus.R".
-data <- read.csv("../cleaned.csv")
-summary(data)
-dim(data)
-
-# Change the data types again. 
-data <- data %>% transmute(duration = as.numeric(duration),
-                           age = as.numeric(age),
-                           gender = as.factor(gender),
-                           nationality = as.factor(nationality),
-                           sending.country = as.factor(sending.country),
-                           receiving.country = as.factor(receiving.country),
-                           activity = as.factor(activity),
-                           participants = participants)
-
-describe(data)
+# data <- read.csv("../cleaned.csv")
+# summary(data)
+# dim(data)
+# 
+# # Change the data types again. 
+# data <- data %>% transmute(duration = as.numeric(duration),
+#                            age = as.numeric(age),
+#                            gender = as.factor(gender),
+#                            nationality = as.factor(nationality),
+#                            sending.country = as.factor(sending.country),
+#                            receiving.country = as.factor(receiving.country),
+#                            activity = as.factor(activity),
+#                            participants = participants)
+# 
+# describe(data)
+data <- readRDS("../10kpoints.rds") # Load the sampled data. 
 
 # We want to model the duration of the student exchange. 
 dur <- data$duration 
@@ -36,25 +37,24 @@ any(is.na(dur)) # Checking to be sure that there are no NA here.
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
 
-points <- 10000
-train <- sample(dur, size = points)
+points <- dim(data)[[1]] # Or length(dur)
 data_list <- list(
   n=points,
-  y=train # Sample `points` number of points from the dataset.
+  y=dur # Sample `points` number of points from the dataset.
 )
 
-# fit1 <- stan("../stan_models/model1.stan", iter = 1000, chains = 4,
-#             data = data_list, seed = 1)
+fit1 <- stan("../stan_models/model1.stan", iter = 1000, chains = 4,
+             data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
 # Analysis can easily be done later by loading this object. 
-save(fit1, train, file="model1_10k.RData") # Used for saving several objects. 
-#saveRDS(fit1, file = "model1FIT50k.rds") # Used for saving one object. 
+#save(fit1, train, file="model1_10k.RData") # Used for saving several objects. 
+saveRDS(fit1, file = "model1_FIT10k.rds") # Used for saving one object. 
 
-#fit1 <- readRDS("model1FIT50k.rds") # Load one object.
+fit1 <- readRDS("model1FIT50k.rds") # Load one object.
 # Load several objects into scope.
 # In this case we load "fit1" and "train".
-load(file = "model1_10k.RData")
+#load(file = "model1_10k.RData")
 
 # Convergence analysis.
 print(fit1)
@@ -121,18 +121,18 @@ plot(d)
 
 # NY POSTERIOR PREDICTIVE. JEG TROR DENNE BLIR MER KORREKT!
 # Sjekk det ut du også! Det er ikke denne som er lagt inn i rapporten enda!
-N <- 10000
+N <- dim(posterior)[[1]]
 components <- rep(NA, N)
-probs <- sample(posterior$p, size = N, replace = T)
+#probs <- sample(posterior$p, size = N, replace = T)
+probs <- posterior$p
 unf <- runif(N)
 components[unf <= probs] <- 1
 components[unf > probs] <- 2
 mus <- rep(NA, N)
-mus[unf <= probs] <- sample(posterior$mu1, size = table(unf <= probs)[[2]], replace = T)
-mus[unf > probs] <- sample(posterior$mu2, size = table(unf > probs)[[2]], replace = T)
-sd.both <- sample(posterior$sigma, size = N, replace = T)
-sds <- c(sd.both, sd.both)
-samples <- rnorm(N)*sds[components]+mus[components]
+mus[unf <= probs] <- sample(posterior$mu1, size = table(unf <= probs)[[2]], replace = F)
+mus[unf > probs] <- sample(posterior$mu2, size = table(unf > probs)[[2]], replace = F)
+sds <- sample(posterior$sigma, size = N, replace = F)
+samples <- rnorm(N)*sd+mus
 tibble(samples) %>% 
   ggplot(aes(samples)) +
   geom_density(aes(y = (..count..)/sum(..count..))) +
@@ -147,6 +147,7 @@ statistic.distrs <- list(first = rep(NA, n), median = rep(NA, n),
                          mean = rep(NA, n), third = rep(NA, n))
 
 
+jada <- rep(0, n)
 for(i in 1:n){
   # Simulate the posterior distribution using every simulated value from MCMC fit (Stan) once. 
   p.mean <- posterior$p[i]
@@ -158,6 +159,8 @@ for(i in 1:n){
   mus <- c(mu1.mean,mu2.mean)
   sds <- c(sigma.mean,sigma.mean) 
   samples <- rnorm(N)*sds[components]+mus[components]
+  
+  jada <- jada + samples
 
   # Simulate from the posterior distribution.
   q <- quantile(samples, c(0.25, 0.5, 0.75))
@@ -167,6 +170,7 @@ for(i in 1:n){
   statistic.distrs$third[i] <- q[3]
 }
 
+plot(density(jada))
 # Compare with the same statistics in the data. The "data" in this case is the sampled data point
 # used to fit the model fith Stan.
 q.data <- quantile(train, c(0.25, 0.5, 0.75)) 
