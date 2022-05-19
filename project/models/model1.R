@@ -3,7 +3,6 @@ library(bayesplot)
 library(tidyverse)
 library(Hmisc)
 library(ggplot2)
-library(ggthemes)
 library(xtable)
 
 # Set parameter that tells Stan how many cores the machine has. 
@@ -12,7 +11,7 @@ library(xtable)
 
 set.seed(1234)
 setwd("/home/ajo/gitRepos/bayesian/project/models")
-# Read the training data set that was sampled in "sample_data_points.R".
+# Read the training data set that was sampled.
 data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 
 # We want to model the duration of the student exchange. 
@@ -27,18 +26,18 @@ data_list <- list(
   y=dur 
 )
 
-#fit1 <- stan("../stan_models/model1.stan", iter = 2000, chains = 4,
-#             data = data_list, seed = 1)
+fit1 <- stan("../stan_models/model1.stan", iter = 2000, chains = 4,
+             data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
 # Analysis can easily be done later by loading this object. 
 #save(fit1, train, file="model1_10k.RData") # Used for saving several objects. 
-#saveRDS(fit1, file = "../model1_FIT15k.rds") # Used for saving one object. 
+saveRDS(fit1, file = "../model1_FIT15k.rds") # Used for saving one object. 
 
 fit1 <- readRDS("../model1_FIT15k.rds") # Load one object.
 # Load several objects into scope.
 # In this case we load "fit1" and "train".
-#load(file = "model1_10k.RData")
+#load(file = "model1_15k.RData")
 
 # Convergence analysis.
 print(fit1)

@@ -7,34 +7,15 @@ library(xtable)
 
 set.seed(1234)
 setwd("/home/ajo/gitRepos/bayesian/project/models")
-# Read the data that was cleaned in "erasmus.R".
-data <- read.csv("../cleaned.csv")
-summary(data)
-dim(data)
 
-# Change the data types again. 
-data <- data %>% transmute(duration = as.numeric(duration),
-                           age = as.numeric(age),
-                           gender = as.factor(gender),
-                           nationality = as.factor(nationality),
-                           sending.country = as.factor(sending.country),
-                           receiving.country = as.factor(receiving.country),
-                           activity = as.factor(activity),
-                           participants = participants)
-
-describe(data)
-# Omit the unknown genders for our regression model
-data <- data %>% filter(gender == "Female" | gender == "Male")
-summary(data)
-data$gender <- as.integer(data$gender) - 1
+# Read the training data set that was sampled.
+data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 describe(data)
 
-
-
+# Sample 5k points from the 15k sample to begin with. 
 points <- 5000
 sample_df <- data[sample(1:nrow(data), points),]
 summary(sample_df)
-
 
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
@@ -46,17 +27,24 @@ data_list <- list(
   x2=sample_df$gender
 )
 
-fit1 <- stan("../stan_models/model4.stan", iter = 1000, chains = 4,
+fit4 <- stan("../stan_models/model4.stan", iter = 1000, chains = 4,
              data = data_list, seed = 1)
 
+# Save the fitted object in order to not run again every time. 
+# Analysis can easily be done later by loading this object. 
+saveRDS(fit4, file = "../model4_FIT15k.rds") # Used for saving one object. 
+
+# Load the (already) generated object into scope. 
+fit4 <- readRDS("../model4_FIT15k.rds") # Load one object.
+
 # Convergence analysis.
-print(fit1)
-traceplot(fit1)
+print(fit4)
+traceplot(fit4)
 
 # Lag en ok LaTeX tabell!
-xtable(summary(fit1)$summary)
+xtable(summary(fit4)$summary)
 
-posterior <- as.data.frame(fit1)
+posterior <- as.data.frame(fit4)
 y_pred <- posterior[, "y_pred"]
 plot(density(y_pred))
 

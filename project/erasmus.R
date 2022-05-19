@@ -8,7 +8,7 @@ library(xtable)
 ##################################################
 #### Data exploration and feature engineering ####
 ##################################################
-
+set.seed(1234)
 df <- read.csv2("./2021.05.11 KA1 mobilities eligible finalised started in 2019.csv")
 dim(df)
 head(df)
@@ -61,11 +61,40 @@ dim(df %>% filter(duration < 20))
 df <- df %>% filter(duration <= 365, duration >= 20)
 summary(df)
 str(df)
-#print(xtable(summary(subset(df, select=-c(activity,participants)))))
 describe(df)
 
-# I write this datafram to a csv file in order to easily read in other files (already cleaned)
-write.csv(df,"cleaned.csv", row.names = FALSE)
+# Omit the unknown genders for our regression model. 
+data <- df %>% filter(gender == "Female" | gender == "Male")
+summary(data)
+describe(data)
+print(xtable(summary(subset(data, select=-c(activity,participants)))))
+
+# Sample 15k rows from the data set for modelling with Stan.
+# For computational feasibility.
+n <- 15000
+indices <- sample(1:dim(data)[[1]], size = n)
+new.sample <- data %>% slice(indices)
+summary(new.sample)
+dim(new.sample)
+
+# Make table of quantiles in the sampled data, will be used for model checking later. 
+print(xtable(summary(subset(new.sample, select=-c(activity,participants)))))
+
+# Change the gender to an integer value for the regression model. 
+# Female is encoded as 0 and Male is encoded as 1.
+data$gender <- as.integer(data$gender) - 1
+describe(data)
+str(data)
+
+new.sample$gender <- as.integer(new.sample$gender) - 1
+describe(new.sample)
+str(new.sample)
+
+# Save the sample such that it can be loaded directly as a variable in R later. 
+saveRDS(new.sample, file = "15kpoints.rds")
+
+# Cleaned dataframe written to a csv file. 
+write.csv(data,"cleaned.csv", row.names = FALSE)
 
 ###############
 #### Plots ####
