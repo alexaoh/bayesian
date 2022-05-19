@@ -23,3 +23,12 @@ model{
             log1m(p) + normal_lpdf(y[i] | mu2, sigma2));
     }
 }
+
+generated quantities{
+    real y_pred;
+    if (bernoulli_rng(p) == 1) {
+        y_pred = normal_rng(mu1, sigma1);
+    } else {
+        y_pred = normal_rng(mu2, sigma2);
+    }
+}

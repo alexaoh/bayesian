@@ -22,7 +22,7 @@ data_list <- list(
   y=dur
 )
 
-fit2 <- stan("../stan_models/model2.stan", iter = 1000, chains = 4,
+fit2 <- stan("../stan_models/model2.stan", iter = 5000, chains = 4,
              data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
@@ -38,3 +38,15 @@ traceplot(fit2)
 
 # Sjekk om dette fungerer for å lage en ok LaTeX tabell!
 xtable(summary(fit2)$summary)
+
+posterior <- as.data.frame(fit2)
+head(posterior)          
+dim(posterior2)
+
+data.frame(posterior %>% select(y_pred)) %>% 
+  ggplot(aes(y_pred)) +
+  geom_density(aes(y = (..count..)/sum(..count..))) +
+  ggtitle("Mix of Gaussian") + 
+  ylab("Posterior Predictive Distribution") +
+  xlab("Duration [days]") 
+#+ ggsave("../626fca86090ba51a6aff419a/plots/postpred2.pdf", width = 7, height = 5)
