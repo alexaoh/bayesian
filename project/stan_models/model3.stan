@@ -19,7 +19,7 @@ model{
     sigma1 ~ inv_gamma(nu,gam);
     sigma2 ~ inv_gamma(nu,gam);
     nu ~ normal(0,10);
-    gam ~ inv_gamma(1,1);
+    gam ~ inv_gamma(10,1000);
     p ~ uniform(0,1);
     for (i in 1:n) {
         target += log_sum_exp(

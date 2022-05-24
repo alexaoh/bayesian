@@ -12,14 +12,11 @@ setwd("/home/ajo/gitRepos/bayesian/project/models")
 data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 describe(data)
 
-# Sample 5k points from the 15k sample to begin with. 
-points <- 5000
-sample_df <- data[sample(1:nrow(data), points),]
-summary(sample_df)
+points <- dim(data)[[1]] 
 
 data_list <- list(
   n=points,
-  y=sample_df$duration
+  y=data$duration
 )
 
 fit3 <- stan("../stan_models/model3.stan", iter = 1000, chains = 4,

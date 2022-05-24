@@ -16,7 +16,6 @@ data <- data %>% filter(gender == "Female" | gender == "Male")
 data$gender <- as.integer(data$gender) - 1
 describe(data)
 
-# Sample 5k points from the 15k sample to begin with. 
 points <- dim(data)[[1]] 
 
 # We simulate values from the posterior distribution using Stan. 
@@ -42,6 +41,7 @@ fit4 <- readRDS("../model4_FIT15k.rds") # Load one object.
 # Convergence analysis.
 print(fit4)
 traceplot(fit4)
+ggsave("../626fca86090ba51a6aff419a/plots/traceplot4.pdf", width = 7, height = 5)
 
 # Lag en ok LaTeX tabell!
 xtable(summary(fit4)$summary)
