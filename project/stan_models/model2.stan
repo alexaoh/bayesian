@@ -7,7 +7,7 @@ parameters{
     real mu1;
     real<lower=mu1> mu2;
     real<lower=0> sigma1;
-    real<lower=0> sigma2;
+    real<lower=sigma1> sigma2;
     real<lower=0,upper=1> p;
 }
 
