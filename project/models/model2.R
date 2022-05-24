@@ -11,7 +11,7 @@ setwd("/home/ajo/gitRepos/bayesian/project/models")
 data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 
 # We want to model the duration of the student exchange. 
-dur <- data$duration 
+dur <- data$duration
 
 # We simulate values from the posterior distribution using Stan. 
 # Define model and call stan. 
@@ -22,12 +22,12 @@ data_list <- list(
   y=dur
 )
 
-fit2 <- stan("../stan_models/model2.stan", iter = 5000, chains = 4,
+fit2 <- stan("../stan_models/model2.stan", iter = 2000, chains = 4,
              data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
 # Analysis can easily be done later by loading this object. 
-saveRDS(fit2, file = "../model2_FIT15k.rds") # Used for saving one object. 
+#saveRDS(fit2, file = "../model2_FIT15k.rds") # Used for saving one object. 
 
 # Load the (already) generated object into scope. 
 fit2 <- readRDS("../model2_FIT15k.rds") # Load one object.
@@ -36,7 +36,6 @@ fit2 <- readRDS("../model2_FIT15k.rds") # Load one object.
 print(fit2)
 traceplot(fit2)
 
-# Sjekk om dette fungerer for å lage en ok LaTeX tabell!
 xtable(summary(fit2)$summary)
 
 posterior <- as.data.frame(fit2)

@@ -79,6 +79,11 @@ data.frame(posterior %>% select(y_pred)) %>%
   xlab("Duration [days]") 
 #+ ggsave("../626fca86090ba51a6aff419a/plots/postpred1.pdf", width = 7, height = 5)
 
+plot_title <- ggtitle("Posterior distribution of sigma", "with medians and 80% intervals")
+mcmc_areas(posterior %>% select(sigma), 
+           pars = c("sigma"), 
+           prob = 0.8) + plot_title
+
 ####### Model Checking
 # Calculate the Posterior Predictive Distribution.
 # TROR DETTE BLIR LITT FEIL?!
@@ -139,7 +144,7 @@ statistic.distrs <- list(first = rep(NA, n), median = rep(NA, n),
 
 for(i in 1:n){
   # Simulate the posterior distribution using every simulated value from MCMC fit (Stan) once. 
-  p<- posterior$p[i]
+  p <- posterior$p[i]
   mu1 <- posterior$mu1[i]
   mu2 <- posterior$mu2[i]
   sigma <- posterior$sigma[i]
