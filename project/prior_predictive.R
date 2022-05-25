@@ -9,29 +9,35 @@ x <- seq(0, 500, delta.x)
 N <- length(x)
 m1 <- 120
 m2 <- 280
-sigma.sq <- rinvgamma(N, 10, 1000)
+prior.sigma <- rinvgamma(N, 10, 1000)
 sigma <- rinvgamma(N, 1, 1)
 
 s <- seq(0, 500, .01)
 plot(s, dinvgamma(s, 10, 1000), type = 'l')
 
-hist(sigma.sq, breaks = 50, freq = F)
+hist(prior.sigma, breaks = 50, freq = F)
 
-prior.mu1 <- rnorm(x, mean = m1, sd = sigma.sq)
+prior.mu1 <- rnorm(x, mean = m1, sd = prior.sigma)
 plot(density(prior.mu1))
-prior.mu2 <- rnorm(x, mean = m2, sd = sigma.sq)
+prior.mu2 <- rnorm(x, mean = m2, sd = prior.sigma)
 plot(density(prior.mu2))
-tibble(x, prior.mu1, prior.mu2) %>% 
-  ggplot() +
-  geom_density(aes(x = prior.mu1, linetype = "c")) +
-  geom_density(aes(x = prior.mu2, linetype = "e")) +
-  ggtitle("Prior Distributions") +
-  ylab("Density") +
-  scale_linetype_manual(name = "Mean Parameters", 
-                       values = 1:2, labels = c("mu1", "mu2"))
-ggsave("../626fca86090ba51a6aff419a/plots/priorpreds.pdf", width = 7, height = 5)
 
 prior.p <- runif(x)
-pror.y_pred <- prior.p*rnorm(x, mean = prior.mu1, sigma.sq) +
-                (1 - prior.p)*rnorm(x, mean = prior.mu2, sigma.sq)
-plot(density(prior.mu2))
+prior.y_pred <- prior.p*rnorm(x, mean = prior.mu1, prior.sigma) +
+                (1 - prior.p)*rnorm(x, mean = prior.mu2, prior.sigma)
+plot(density(prior.y_pred))
+
+tibble(x, prior.sigma, prior.mu1, prior.mu2, prior.y_pred) %>% 
+  ggplot() +
+  geom_density(aes(x = prior.sigma, linetype = "c")) +
+  geom_density(aes(x = prior.mu1, linetype = "e")) +
+  geom_density(aes(x = prior.mu2, linetype = "d")) +
+  geom_density(aes(x = prior.y_pred , linetype = "b")) +
+  ggtitle("Prior Distributions") +
+  ylab("Density") +
+  xlab("Duration") +
+  xlim(c(0, 500)) + 
+  scale_linetype_manual(name = "Mean Parameters", 
+                       values = 1:4, labels = c("sigma", "mu1", "mu2", "y_pred"))
+ggsave("./626fca86090ba51a6aff419a/plots/priorpreds.pdf", width = 7, height = 5)
+
