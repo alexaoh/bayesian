@@ -9,12 +9,11 @@ x <- seq(0, 500, delta.x)
 N <- length(x)
 m1 <- 120
 m2 <- 280
-prior.sigma <- sqrt(rinvgamma(N, 10, 1000))
-prior.sigma <- 10
-sigma <- rinvgamma(N, 1, 1)
+prior.sigma <- sqrt(rinvgamma(N, 10, 10000))
 
 s <- seq(0, 500, .01)
 plot(s, sqrt(dinvgamma(s, 10, 1000)), type = 'l')
+plot(s, dinvgamma(s, 10, 1000), type = 'l')
 
 hist(prior.sigma, breaks = 50, freq = F)
 
@@ -34,17 +33,15 @@ plot(density(prior.y_pred2))
 
 tibble(prior.sigma, prior.mu1, prior.mu2, prior.y_pred2) %>% 
   ggplot() +
-  geom_density(aes(prior.sigma, y = (..count..)/sum(..count..), linetype = "c")) +
-  geom_density(aes(prior.mu1, y = (..count..)/sum(..count..), linetype = "e")) +
-  geom_density(aes(prior.mu2, y = (..count..)/sum(..count..), linetype = "d")) +
-  geom_density(aes(prior.y_pred2, y = (..count..)/sum(..count..), linetype = "b")) +
+  geom_density(aes(prior.sigma, y = (..count..)/sum(..count..), color = "blue")) +
+  geom_density(aes(prior.mu1, y = (..count..)/sum(..count..), color = "red")) +
+  geom_density(aes(prior.mu2, y = (..count..)/sum(..count..), color = "green")) +
+  geom_density(aes(prior.y_pred2, y = (..count..)/sum(..count..), color = "yellow")) +
   ggtitle("Prior Distributions") +
-  ylab("Density") +
-  xlab("Duration") +
-  xlim(c(0, 500))  
-  #scale_linetype_manual(name = "Mean Parameters", 
-  #                     values = 1:4, labels = c("sigma", "mu1", "mu2", "y_pred"))
-  #scale_colour_manual(name = "Parameter Priors", 
-  #                   values = c("red", "blue", "green", "black"), 
-  #                   labels = c("sigma", "mu1", "mu2", "y_pred"))
+  labs(x = "Duration",
+      y = "Density",
+      ) +
+  xlim(c(0, 500)) +
+  scale_color_manual(name = "Prior", values = c("blue", "red", "green", "yellow"),
+                     labels = c("sigma", "mu1", "mu2", "y_pred"))
 ggsave("./626fca86090ba51a6aff419a/plots/priorpreds.pdf", width = 7, height = 5)
