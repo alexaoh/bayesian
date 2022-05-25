@@ -20,8 +20,8 @@ model{
     beta02 ~ normal(280, sigma2);
     beta1 ~ normal(0,100);
     beta2 ~ normal(0,100);
-    sigma1 ~ inv_gamma(10,1000);
-    sigma2 ~ inv_gamma(10,1000);
+    sigma1 ~ inv_gamma(10,100);
+    sigma2 ~ inv_gamma(10,100);
     p ~ uniform(0,1);
     for (i in 1:n) {
         target += log_sum_exp(

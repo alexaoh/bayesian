@@ -80,6 +80,8 @@ q.sim
 q.data <- quantile(data$duration, c(0.25, 0.5, 0.75))
 q.data
 
+mean(y_pred)
+mean(data$duration)
 quantile(posterior$beta1, c(0.025, 0.975))
 quantile(posterior$beta2, c(0.025, 0.975))
 
