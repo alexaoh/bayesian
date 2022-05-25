@@ -9,11 +9,12 @@ x <- seq(0, 500, delta.x)
 N <- length(x)
 m1 <- 120
 m2 <- 280
-prior.sigma <- rinvgamma(N, 10, 1000)
+prior.sigma <- sqrt(rinvgamma(N, 10, 1000))
+prior.sigma <- 10
 sigma <- rinvgamma(N, 1, 1)
 
 s <- seq(0, 500, .01)
-plot(s, dinvgamma(s, 10, 1000), type = 'l')
+plot(s, sqrt(dinvgamma(s, 10, 1000)), type = 'l')
 
 hist(prior.sigma, breaks = 50, freq = F)
 
@@ -23,21 +24,27 @@ prior.mu2 <- rnorm(x, mean = m2, sd = prior.sigma)
 plot(density(prior.mu2))
 
 prior.p <- runif(x)
+components <- sample(1:2,prob=c(0.5,0.5),size=N,replace=TRUE)
+mus <- c(m1,m2)
+prior.y_pred2 <- rnorm(N, mean = 0, sd = prior.sigma)+mus[components]
 prior.y_pred <- prior.p*rnorm(x, mean = prior.mu1, prior.sigma) +
                 (1 - prior.p)*rnorm(x, mean = prior.mu2, prior.sigma)
 plot(density(prior.y_pred))
+plot(density(prior.y_pred2))
 
-tibble(x, prior.sigma, prior.mu1, prior.mu2, prior.y_pred) %>% 
+tibble(prior.sigma, prior.mu1, prior.mu2, prior.y_pred2) %>% 
   ggplot() +
-  geom_density(aes(x = prior.sigma, linetype = "c")) +
-  geom_density(aes(x = prior.mu1, linetype = "e")) +
-  geom_density(aes(x = prior.mu2, linetype = "d")) +
-  geom_density(aes(x = prior.y_pred , linetype = "b")) +
+  geom_density(aes(prior.sigma, y = (..count..)/sum(..count..), linetype = "c")) +
+  geom_density(aes(prior.mu1, y = (..count..)/sum(..count..), linetype = "e")) +
+  geom_density(aes(prior.mu2, y = (..count..)/sum(..count..), linetype = "d")) +
+  geom_density(aes(prior.y_pred2, y = (..count..)/sum(..count..), linetype = "b")) +
   ggtitle("Prior Distributions") +
   ylab("Density") +
   xlab("Duration") +
-  xlim(c(0, 500)) + 
-  scale_linetype_manual(name = "Mean Parameters", 
-                       values = 1:4, labels = c("sigma", "mu1", "mu2", "y_pred"))
+  xlim(c(0, 500))  
+  #scale_linetype_manual(name = "Mean Parameters", 
+  #                     values = 1:4, labels = c("sigma", "mu1", "mu2", "y_pred"))
+  #scale_colour_manual(name = "Parameter Priors", 
+  #                   values = c("red", "blue", "green", "black"), 
+  #                   labels = c("sigma", "mu1", "mu2", "y_pred"))
 ggsave("./626fca86090ba51a6aff419a/plots/priorpreds.pdf", width = 7, height = 5)
-
