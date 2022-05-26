@@ -125,18 +125,16 @@ ggsave("./626fca86090ba51a6aff419a/plots/age_gender_box.pdf", width = 7, height 
 ### Countries
 
 ggplot(data = df) + 
-  geom_bar(aes(x = fct_infreq(sending.country), fill = sending.country)) + 
+  geom_bar(aes(x = fct_infreq(sending.country))) + 
   labs(x = "Sending country",
-       y = "Number of students",
-       fill = "Sending country") +
+       y = "Number of students") +
   theme(axis.text.x = element_text(size=6))
 ggsave("./626fca86090ba51a6aff419a/plots/sending_countries.pdf", width = 7, height = 5)
 
 ggplot(data = df) + 
-  geom_bar(aes(x = fct_infreq(receiving.country), fill = receiving.country)) +
+  geom_bar(aes(x = fct_infreq(receiving.country))) +
   labs(x = "Receiving country",
-       y = "Number of students",
-       fill = "Receiving country") +
+       y = "Number of students") +
   theme(axis.text.x = element_text(size=6))
 ggsave("./626fca86090ba51a6aff419a/plots/receiving_countries.pdf", width = 7, height = 5)
 
