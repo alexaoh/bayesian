@@ -26,22 +26,18 @@ data_list <- list(
   y=dur 
 )
 
-fit1 <- stan("../stan_models/model1.stan", iter = 2000, chains = 4,
-             data = data_list, seed = 1)
+# fit1 <- stan("../stan_models/model1.stan", iter = 2000, chains = 4,
+#              data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
-# Analysis can easily be done later by loading this object. 
-#save(fit1, train, file="model1_10k.RData") # Used for saving several objects. 
-saveRDS(fit1, file = "../model1_FIT15k.rds") # Used for saving one object. 
+#saveRDS(fit1, file = "../model1_FIT15k.rds") # Used for saving one object. 
 
 fit1 <- readRDS("../model1_FIT15k.rds") # Load one object.
-# Load several objects into scope.
-# In this case we load "fit1" and "train".
-#load(file = "model1_15k.RData")
 
 # Convergence analysis.
 print(fit1)
 traceplot(fit1)
+ggsave("../626fca86090ba51a6aff419a/plots/traceplot1.pdf", width = 7, height = 5)
 
 # Lag en ok LaTeX tabell!
 xtable(summary(fit1)$summary)
@@ -76,13 +72,49 @@ data.frame(posterior %>% select(y_pred)) %>%
   geom_density(aes(y = (..count..)/sum(..count..))) +
   ggtitle("Mix of Gaussian") + 
   ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") 
-#+ ggsave("../626fca86090ba51a6aff419a/plots/postpred1.pdf", width = 7, height = 5)
+  xlab("Duration [days]") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/model1_postpred.pdf", width = 7, height = 5)
+# Velg én av disse som postpred for modellene!
+plot_title <- ggtitle("Posterior predictive distribution", "with medians and 80% intervals")
+mcmc_areas(posterior %>% select(y_pred), 
+           pars = c("y_pred"), 
+           prob = 0.8) + plot_title + 
+  theme_gray() + ylab("Posterior Predictive Distribution") +
+  xlab("Duration [days]") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/model1_postpred.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of sigma", "with medians and 80% intervals")
 mcmc_areas(posterior %>% select(sigma), 
            pars = c("sigma"), 
-           prob = 0.8) + plot_title
+           prob = 0.8) + plot_title + 
+  theme_gray() + ylab("Posterior Predictive Distribution") +
+  xlab("Duration [days]") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/model1_postsigma.pdf", width = 7, height = 5)
+
+plot_title <- ggtitle("Posterior distribution of mu1", "with median and 80% intervals")
+mcmc_areas(posterior %>% select(mu1), 
+           pars = c("mu1"), 
+           prob = 0.8) + plot_title + 
+  theme_gray() + ylab("Posterior Predictive Distribution") +
+  xlab("Duration [days]") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/model1_postmu1.pdf", width = 7, height = 5)
+
+plot_title <- ggtitle("Posterior distribution of mu2", "with median and 80% intervals")
+mcmc_areas(posterior %>% select(mu2), 
+           pars = c("mu2"), 
+           prob = 0.8) + plot_title + 
+  theme_gray() + ylab("Posterior Predictive Distribution") +
+  xlab("Duration [days]") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/model1_postmu2.pdf", width = 7, height = 5)
+
+plot_title <- ggtitle("Posterior distribution of p", "with median and 80% intervals")
+mcmc_areas(posterior %>% select(p), 
+           pars = c("p"), 
+           prob = 0.8) + plot_title + 
+  theme_gray() + ylab("Posterior Predictive Distribution") +
+  xlab("Probability") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/model1_postp.pdf", width = 7, height = 5)
+
 
 ####### Model Checking
 # Calculate the Posterior Predictive Distribution.
@@ -162,8 +194,8 @@ for(i in 1:n){
   statistic.distrs$third[i] <- q[3][[1]]
 }
 
-# Compare with the same statistics in the data. The "data" in this case is the sampled data point
-# used to fit the model fith Stan.
+# Compare with the same statistics in the data. The "data" in this case is the sampled data points
+# used to fit the model fit Stan.
 q.data <- quantile(dur, c(0.25, 0.5, 0.75)) 
 stat.data <- list(first = q.data[1][[1]], median = q.data[2][[1]], 
                   mean = mean(dur), third = q.data[3][[1]])
@@ -188,8 +220,8 @@ df2 %>%
   geom_density(aes(x = value_dens, y = (..count..)/sum(..count..))) +
   geom_vline(aes(xintercept = line)) + 
   #facet_grid(rows = vars(Statistic), scales = "free")
-  facet_wrap(~Statistic, scales = "free") 
- #+ggsave("../626fca86090ba51a6aff419a/plots/checkingModel1.pdf", width = 7, height = 5)
+  facet_wrap(~Statistic, scales = "free") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/checkingModel1.pdf", width = 7, height = 5)
 # Nice plot showing all the chosen statistics at the same time!
 
 # Numerical calculations:

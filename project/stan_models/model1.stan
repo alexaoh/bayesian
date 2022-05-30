@@ -13,7 +13,7 @@ parameters{
 model{
     mu1 ~ normal(120, sigma);
     mu2 ~ normal(280, sigma);
-    sigma ~ inv_gamma(1,1);
+    sigma ~ inv_gamma(10,100);
     p ~ uniform(0,1);
     for (i in 1:n) {
         target += log_sum_exp(

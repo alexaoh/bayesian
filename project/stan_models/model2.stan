@@ -12,8 +12,8 @@ parameters{
 }
 
 model{
-    sigma1 ~ inv_gamma(1,1);
-    sigma2 ~ inv_gamma(1,1);
+    sigma1 ~ inv_gamma(10,100);
+    sigma2 ~ inv_gamma(10,100);
     mu1 ~ normal(120, sigma1);
     mu2 ~ normal(280, sigma2);
     p ~ uniform(0,1);

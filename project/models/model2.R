@@ -22,8 +22,8 @@ data_list <- list(
   y=dur
 )
 
-fit2 <- stan("../stan_models/model2.stan", iter = 2000, chains = 4,
-             data = data_list, seed = 1)
+# fit2 <- stan("../stan_models/model2.stan", iter = 2000, chains = 4,
+#              data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
 # Analysis can easily be done later by loading this object. 
@@ -35,6 +35,7 @@ fit2 <- readRDS("../model2_FIT15k.rds") # Load one object.
 # Convergence analysis.
 print(fit2)
 traceplot(fit2)
+ggsave("../626fca86090ba51a6aff419a/plots/traceplot2.pdf", width = 7, height = 5)
 
 xtable(summary(fit2)$summary)
 
@@ -47,5 +48,8 @@ data.frame(posterior %>% select(y_pred)) %>%
   geom_density(aes(y = (..count..)/sum(..count..))) +
   ggtitle("Mix of Gaussian") + 
   ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") 
-#+ ggsave("../626fca86090ba51a6aff419a/plots/postpred2.pdf", width = 7, height = 5)
+  xlab("Duration [days]") + 
+  ggsave("../626fca86090ba51a6aff419a/plots/postpred2.pdf", width = 7, height = 5)
+
+
+# Add code for plotting posterior distributions here as well (as in model 1)
