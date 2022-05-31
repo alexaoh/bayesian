@@ -172,8 +172,7 @@ n <- dim(posterior)[[1]]
 # We select the statistics 1st quart, median and 3rd quart. 
 statistic.distrs <- list(first = rep(NA, n), median = rep(NA, n), 
                          mean = rep(NA, n), third = rep(NA, n))
-
-
+N <- 10000
 for(i in 1:n){
   # Simulate the posterior distribution using every simulated value from MCMC fit (Stan) once. 
   p <- posterior$p[i]
@@ -238,7 +237,7 @@ table.numerical.model1 <- cbind(vec1, vec2, vec3, vec4)
 colnames(table.numerical.model1) <- c("25%", "Mean", "50%", "75%")
 rownames(table.numerical.model1) <- c("Less", "Larger", "min") # Change these names later! 
 # And explain the calculations in the text!!
-xtable(as.data.frame(table.numerical.model1))
+xtable(as.data.frame(table.numerical.model1), digits = 5)
 
 # tibble(statistic.distrs$first) %>% 
 #   ggplot(aes(statistic.distrs$first)) +
