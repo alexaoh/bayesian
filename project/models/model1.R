@@ -72,48 +72,48 @@ data.frame(posterior %>% select(y_pred)) %>%
   geom_density(aes(y = (..count..)/sum(..count..))) +
   ggtitle("Mix of Gaussian") + 
   ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model1_postpred.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model1_postpred.pdf", width = 7, height = 5)
 # Velg én av disse som postpred for modellene!
 plot_title <- ggtitle("Posterior predictive distribution", "with medians and 80% intervals")
 mcmc_areas(posterior %>% select(y_pred), 
            pars = c("y_pred"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model1_postpred.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model1_postpred.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of sigma", "with medians and 80% intervals")
 mcmc_areas(posterior %>% select(sigma), 
            pars = c("sigma"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model1_postsigma.pdf", width = 7, height = 5)
+  xlab("Duration [days]") 
+ggsave("../626fca86090ba51a6aff419a/plots/model1_postsigma.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of mu1", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(mu1), 
            pars = c("mu1"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model1_postmu1.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model1_postmu1.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of mu2", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(mu2), 
            pars = c("mu2"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model1_postmu2.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model1_postmu2.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of p", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(p), 
            pars = c("p"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Probability") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model1_postp.pdf", width = 7, height = 5)
+  xlab("Probability")
+ggsave("../626fca86090ba51a6aff419a/plots/model1_postp.pdf", width = 7, height = 5)
 
 
 ####### Model Checking
@@ -219,8 +219,8 @@ df2 %>%
   geom_density(aes(x = value_dens, y = (..count..)/sum(..count..))) +
   geom_vline(aes(xintercept = line)) + 
   #facet_grid(rows = vars(Statistic), scales = "free")
-  facet_wrap(~Statistic, scales = "free") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/checkingModel1.pdf", width = 7, height = 5)
+  facet_wrap(~Statistic, scales = "free")
+ggsave("../626fca86090ba51a6aff419a/plots/checkingModel1.pdf", width = 7, height = 5)
 # Nice plot showing all the chosen statistics at the same time!
 
 # Numerical calculations:

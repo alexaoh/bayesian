@@ -157,7 +157,7 @@ df2 %>%
   geom_vline(aes(xintercept = line)) + 
   #facet_grid(rows = vars(Statistic), scales = "free")
   facet_wrap(~Statistic, scales = "free")
-ggsave("../626fca86090ba51a6aff419a/plots/checkingModel2.pdf", width = 7, height = 5)
+ggsave("../626fca86090ba51a6aff419a/plots/checkingModel3.pdf", width = 7, height = 5)
 # Nice plot showing all the chosen statistics at the same time!
 
 # Numerical calculations:
