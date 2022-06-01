@@ -44,7 +44,7 @@ plot(density(y_pred))
 tibble(y_pred) %>% 
   ggplot(aes(y_pred)) +
   geom_density(aes(y = (..count..)/sum(..count..))) +
-  ggtitle("Mix of Gaussian") +
+  ggtitle("Mix of Gaussian")
 ggsave("../626fca86090ba51a6aff419a/plots/model3_postpred.pdf", width = 7, height = 5)
 # Velg én av disse som postpred for modellene!
 plot_title <- ggtitle("Posterior predictive distribution", "with medians and 80% intervals")
@@ -52,56 +52,56 @@ mcmc_areas(posterior %>% select(y_pred),
            pars = c("y_pred"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postpred.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postpred.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of sigma1 and sigma2", "with medians and 80% intervals")
 mcmc_areas(posterior %>% select(sigma1, sigma2), 
            pars = c("sigma1", "sigma2"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postsigma.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postsigma.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of mu1", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(mu1), 
            pars = c("mu1"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postmu1.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postmu1.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of mu2", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(mu2), 
            pars = c("mu2"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Duration [days]") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postmu2.pdf", width = 7, height = 5)
+  xlab("Duration [days]")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postmu2.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of p", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(p), 
            pars = c("p"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Probability") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postp.pdf", width = 7, height = 5)
+  xlab("Probability")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postp.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of nu", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(nu), 
            pars = c("nu"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Probability") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postnu.pdf", width = 7, height = 5)
+  xlab("Probability")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postnu.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of gamma", "with median and 80% intervals")
 mcmc_areas(posterior %>% select(gam), 
            pars = c("gam"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Predictive Distribution") +
-  xlab("Probability") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/model3_postgam.pdf", width = 7, height = 5)
+  xlab("Probability")
+ggsave("../626fca86090ba51a6aff419a/plots/model3_postgam.pdf", width = 7, height = 5)
 
 n <- dim(posterior)[[1]]
 # We select the statistics 1st quart, median and 3rd quart. 
@@ -156,8 +156,8 @@ df2 %>%
   geom_density(aes(x = value_dens, y = (..count..)/sum(..count..))) +
   geom_vline(aes(xintercept = line)) + 
   #facet_grid(rows = vars(Statistic), scales = "free")
-  facet_wrap(~Statistic, scales = "free") + 
-  ggsave("../626fca86090ba51a6aff419a/plots/checkingModel2.pdf", width = 7, height = 5)
+  facet_wrap(~Statistic, scales = "free")
+ggsave("../626fca86090ba51a6aff419a/plots/checkingModel2.pdf", width = 7, height = 5)
 # Nice plot showing all the chosen statistics at the same time!
 
 # Numerical calculations:
