@@ -4,6 +4,8 @@ library(invgamma)
 library(tidyverse)
 library(ggplot2)
 
+save <- F # Set parameter for saving images. 
+
 # Model 1
 delta.x <- 0.1
 x <- seq(0, 500, delta.x)
@@ -34,7 +36,7 @@ tibble(prior.sigma, prior.mu1, prior.mu2, prior.y_pred) %>%
   xlim(c(0, 500)) +
   scale_color_manual(name = "Prior", values = c("blue", "red", "green", "yellow"),
                      labels = c("sigma", "mu1", "mu2", "y_pred"))
-ggsave("../626fca86090ba51a6aff419a/plots/model1_priorpreds.pdf", width = 7, height = 5)
+if (save) ggsave("../626fca86090ba51a6aff419a/plots/model1_priorpreds.pdf", width = 7, height = 5)
 
 # Model 2 - not necessary since it looks exactly the same as for model 1. 
 # prior.sigma1 <- rinvgamma(N, 10,100)
@@ -64,3 +66,5 @@ ggsave("../626fca86090ba51a6aff419a/plots/model1_priorpreds.pdf", width = 7, hei
 #   scale_color_manual(name = "Prior", values = c("blue", "orange", "red", "green", "yellow"),
 #                      labels = c("sigma1", "sigma2", "mu1", "mu2", "y_pred")) + 
 #   ggsave("./626fca86090ba51a6aff419a/plots/model2_priorpreds.pdf", width = 7, height = 5)
+
+# Model 3
