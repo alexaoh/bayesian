@@ -85,7 +85,7 @@ mcmc_areas(posterior %>% select(nu),
            pars = c("nu"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Distribution") +
-  xlab("Probability")
+  xlab("Duration [days]")
 if (save) ggsave("../626fca86090ba51a6aff419a/plots/model3_postnu.pdf", width = 7, height = 5)
 
 plot_title <- ggtitle("Posterior distribution of gamma", "with median and 80% intervals")
@@ -93,7 +93,7 @@ mcmc_areas(posterior %>% select(gam),
            pars = c("gam"), 
            prob = 0.8) + plot_title + 
   theme_gray() + ylab("Posterior Distribution") +
-  xlab("Probability")
+  xlab("Duration [days]")
 if (save) ggsave("../626fca86090ba51a6aff419a/plots/model3_postgam.pdf", width = 7, height = 5)
 
 # Model Checking.
