@@ -5,7 +5,7 @@ library(Hmisc)
 library(ggplot2)
 library(xtable)
 
-save <- F # Set parameter for saving images. 
+save <- T # Set parameter for saving images. 
 
 set.seed(1234)
 setwd("/home/ajo/gitRepos/bayesian/project/models")

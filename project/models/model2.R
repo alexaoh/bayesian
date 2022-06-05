@@ -5,7 +5,7 @@ library(Hmisc)
 library(ggplot2)
 library(xtable)
 
-save <- F # Set parameter for saving images. 
+save <- T # Set parameter for saving images. 
 
 set.seed(1234)
 setwd("/home/ajo/gitRepos/bayesian/project/models")
@@ -43,7 +43,7 @@ xtable(summary(fit2)$summary)
 
 posterior <- as.data.frame(fit2)
 head(posterior)          
-dim(posterior2)
+dim(posterior)
 
 plot_title <- ggtitle("Posterior predictive distribution", "with medians and 80% intervals")
 mcmc_areas(posterior %>% select(y_pred), 
