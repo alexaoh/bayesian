@@ -22,9 +22,6 @@ nam <- c("25%", "50%", "75%", "Mean")
 
 q.data <- c(quantile(data$duration, c(0.25, 0.5, 0.75), names = T), mean(data$duration))
 names(q.data) <- nam
-#q.data <- as.data.frame(q.data)
-#knitr::kable(q.data)
-#xtable(as.data.frame(q.data), digits = 5)
 
 q.sim1 <- c(quantile(post1$y_pred, c(0.25, 0.5, 0.75), names = T), mean(post1$y_pred))
 names(q.sim1) <- nam

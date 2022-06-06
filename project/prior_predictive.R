@@ -1,4 +1,4 @@
-# Plot the prior predictive distributions of mu1 and mu2. 
+# Plot the prior predictive distributions according to definition of model 1. 
 
 library(invgamma)
 library(tidyverse)
@@ -39,32 +39,3 @@ tibble(prior.sigma, prior.mu1, prior.mu2, prior.y_pred) %>%
 if (save) ggsave("../626fca86090ba51a6aff419a/plots/model1_priorpreds.pdf", width = 7, height = 5)
 
 # Model 2 - not necessary since it looks exactly the same as for model 1. 
-# prior.sigma1 <- rinvgamma(N, 10,100)
-# prior.sigma2 <- rinvgamma(N, 10,100)
-# 
-# prior.mu1 <- rnorm(x, mean = m1, sd = prior.sigma1)
-# prior.mu2 <- rnorm(x, mean = m2, sd = prior.sigma2)
-# 
-# prior.p <- runif(x)
-# components <- sample(1:2,prob=c(0.5,0.5),size=N,replace=TRUE)
-# mus <- c(m1,m2)
-# sds <- c(prior.sigma1, prior.sigma2)
-# prior.y_pred <- rnorm(N)*sds[components]+mus[components]
-# 
-# tibble(prior.sigma1, prior.sigma2, prior.mu1, prior.mu2, prior.y_pred) %>% 
-#   ggplot() +
-#   geom_density(aes(prior.sigma1, y = (..count..)/sum(..count..), color = "blue")) +
-#   geom_density(aes(prior.sigma2, y = (..count..)/sum(..count..), color = "orange")) +
-#   geom_density(aes(prior.mu1, y = (..count..)/sum(..count..), color = "red")) +
-#   geom_density(aes(prior.mu2, y = (..count..)/sum(..count..), color = "green")) +
-#   geom_density(aes(prior.y_pred, y = (..count..)/sum(..count..), color = "yellow")) +
-#   ggtitle("Prior Distributions") +
-#   labs(x = "Duration",
-#        y = "Density",
-#   ) +
-#   xlim(c(0, 500)) +
-#   scale_color_manual(name = "Prior", values = c("blue", "orange", "red", "green", "yellow"),
-#                      labels = c("sigma1", "sigma2", "mu1", "mu2", "y_pred")) + 
-#   ggsave("./626fca86090ba51a6aff419a/plots/model2_priorpreds.pdf", width = 7, height = 5)
-
-# Model 3
