@@ -156,7 +156,7 @@ df2 %>%
   geom_density(aes(x = value_dens, y = (..count..)/sum(..count..))) +
   geom_vline(aes(xintercept = line)) + 
   #facet_grid(rows = vars(Statistic), scales = "free")
-  facet_wrap(~Statistic, scales = "free")
+  facet_wrap(~Statistic, scales = "free") + xlab("Duration [Days]") + ylab("Reference Distributions")
 if (save) ggsave("../626fca86090ba51a6aff419a/plots/checkingModel1.pdf", width = 7, height = 5)
 # Nice plot showing all the chosen statistics at the same time!
 
