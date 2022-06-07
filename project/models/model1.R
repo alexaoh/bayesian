@@ -174,3 +174,4 @@ table.numerical.model1 <- cbind(vec1, vec2, vec3, vec4)
 colnames(table.numerical.model1) <- c("25%", "Mean", "50%", "75%")
 rownames(table.numerical.model1) <- c("Left", "Right", "min") 
 xtable(as.data.frame(table.numerical.model1), digits = 5)
+

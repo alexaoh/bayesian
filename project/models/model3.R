@@ -29,7 +29,7 @@ data_list <- list(
 #saveRDS(fit3, file = "../model3_FIT15k.rds") # Used for saving one object. 
 
 # Load the (already) generated object into scope. 
-fit3 <- readRDS("../model3_FIT15k.rds") # Load one object.
+fit3 <- readRDS("../fits/model3_FIT15k.rds") # Load one object.
 
 # Convergence analysis.
 print(fit3)
@@ -162,3 +162,4 @@ colnames(table.numerical.model3) <- c("25%", "Mean", "50%", "75%")
 rownames(table.numerical.model3) <- c("Left", "Right", "min")
 xtable(as.data.frame(table.numerical.model3), digits = 5)
 #knitr::kable(table.numerical.model2, format = "latex") # Alternative. 
+

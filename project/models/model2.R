@@ -32,7 +32,7 @@ data_list <- list(
 #saveRDS(fit2, file = "../model2_FIT15k.rds") # Used for saving one object. 
 
 # Load the (already) generated object into scope. 
-fit2 <- readRDS("../model2_FIT15k.rds") # Load one object.
+fit2 <- readRDS("../fits/model2_FIT15k.rds") # Load one object.
 
 # Convergence analysis.
 print(fit2)
