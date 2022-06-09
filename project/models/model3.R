@@ -5,23 +5,25 @@ library(Hmisc)
 library(ggplot2)
 library(xtable)
 
-save <- T # Set parameter for saving images. 
+save <- F # Set parameter for saving images. 
 
 set.seed(1234)
-setwd("/home/ajo/gitRepos/bayesian/project/models")
+#setwd("/home/ajo/gitRepos/bayesian/project/models")
 
 # Read the training data set that was sampled.
 data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 describe(data)
 
-points <- dim(data)[[1]] 
+# We simulate values from the posterior distribution using Stan. 
+# Define model and call stan. 
 
+points <- dim(data)[[1]] 
 data_list <- list(
   n=points,
   y=data$duration
 )
 
-#fit3 <- stan("../stan_models/model3.stan", iter = 2000, chains = 4,
+# fit3 <- stan("../stan_models/model3.stan", iter = 2000, chains = 4,
 #             data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
@@ -36,6 +38,7 @@ print(fit3)
 traceplot(fit3)
 if (save) ggsave("../626fca86090ba51a6aff419a/plots/traceplot3.pdf", width = 7, height = 5)
 
+# Make code for LaTeX table. 
 xtable(summary(fit3)$summary)
 
 posterior <- as.data.frame(fit3)
@@ -162,4 +165,3 @@ colnames(table.numerical.model3) <- c("25%", "Mean", "50%", "75%")
 rownames(table.numerical.model3) <- c("Left", "Right", "min")
 xtable(as.data.frame(table.numerical.model3), digits = 5)
 #knitr::kable(table.numerical.model2, format = "latex") # Alternative. 
-

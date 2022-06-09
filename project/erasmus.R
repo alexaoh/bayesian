@@ -10,6 +10,9 @@ save <- F # Set parameter for saving images.
 #### Data exploration and feature engineering ####
 ##################################################
 set.seed(1234)
+# This csv file is downloaded from 
+# https://data.europa.eu/data/datasets/erasmus-mobility-statistics-2014-2019-v2?locale=en
+# It has the same name as we have used below. A zip file containing it is added to the delivery.
 df <- read.csv2("./2021.05.11 KA1 mobilities eligible finalised started in 2019.csv")
 dim(df)
 head(df)

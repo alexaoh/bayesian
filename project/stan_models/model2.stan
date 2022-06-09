@@ -32,3 +32,4 @@ generated quantities{
         y_pred = normal_rng(mu2, sigma2);
     }
 }
+

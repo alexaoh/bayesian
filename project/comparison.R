@@ -1,12 +1,13 @@
 # Make LaTeX tables for comparing model statistics between data and models. 
 
-setwd("/home/ajo/gitRepos/bayesian/project/models")
+library(xtable)
+#setwd("/home/ajo/gitRepos/bayesian/project")
 
 # Load the fit of each model and save the posterior. 
-fit1 <- readRDS("../model1_FIT15k.rds")
-fit2 <- readRDS("../model2_FIT15k.rds") 
-fit3 <- readRDS("../model3_FIT15k.rds") 
-fit4 <- readRDS("../model4_FIT15k.rds") 
+fit1 <- readRDS("fits/model1_FIT15k.rds")
+fit2 <- readRDS("fits/model2_FIT15k.rds") 
+fit3 <- readRDS("fits/model3_FIT15k.rds") 
+fit4 <- readRDS("fits/model4_FIT15k.rds") 
 
 post1 <- as.data.frame(fit1)
 post2 <- as.data.frame(fit2)
@@ -14,7 +15,7 @@ post3 <- as.data.frame(fit3)
 post4 <- as.data.frame(fit4)
 
 # Load data. 
-data <- readRDS("../15kpoints.rds") # Load the sampled data. 
+data <- readRDS("15kpoints.rds") # Load the sampled data. 
 
 # We make tables summarizing the chosen statistics for model checking
 # from each model and the same statistics for our data. 

@@ -5,10 +5,11 @@ library(Hmisc)
 library(ggplot2)
 library(xtable)
 
-save <- T # Set parameter for saving images. 
+save <- F # Set parameter for saving images. 
 
 set.seed(1234)
-setwd("/home/ajo/gitRepos/bayesian/project/models")
+#setwd("/home/ajo/gitRepos/bayesian/project/models")
+
 # Read the training data set that was sampled.
 data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 
@@ -39,6 +40,7 @@ print(fit2)
 traceplot(fit2)
 if (save) ggsave("../626fca86090ba51a6aff419a/plots/traceplot2.pdf", width = 7, height = 5)
 
+# Make code for LaTeX table. 
 xtable(summary(fit2)$summary)
 
 posterior <- as.data.frame(fit2)

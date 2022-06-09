@@ -5,14 +5,15 @@ library(Hmisc)
 library(ggplot2)
 library(xtable)
 
-save <- T # Set parameter for saving images. 
+save <- F # Set parameter for saving images. 
 
 # Set parameter that tells Stan how many cores the machine has. 
 # For computing chains in parallel. 
 #options(mc.cores = parallel::detectCores()) 
 
 set.seed(1234)
-setwd("/home/ajo/gitRepos/bayesian/project/models")
+#setwd("/home/ajo/gitRepos/bayesian/project/models")
+
 # Read the training data set that was sampled.
 data <- readRDS("../15kpoints.rds") # Load the sampled data. 
 
@@ -28,13 +29,13 @@ data_list <- list(
   y=dur 
 )
 
-# fit1 <- stan("../stan_models/model1.stan", iter = 2000, chains = 4,
+#fit1 <- stan("../stan_models/model1.stan", iter = 2000, chains = 4,
 #              data = data_list, seed = 1)
 
 # Save the fitted object in order to not run again every time. 
 #saveRDS(fit1, file = "../model1_FIT15k.rds") # Used for saving one object. 
 
-fit1 <- readRDS("../model1_FIT15k.rds") # Load one object.
+fit1 <- readRDS("../fits/model1_FIT15k.rds") # Load one object.
 
 # Convergence analysis.
 print(fit1)
@@ -174,4 +175,3 @@ table.numerical.model1 <- cbind(vec1, vec2, vec3, vec4)
 colnames(table.numerical.model1) <- c("25%", "Mean", "50%", "75%")
 rownames(table.numerical.model1) <- c("Left", "Right", "min") 
 xtable(as.data.frame(table.numerical.model1), digits = 5)
-
